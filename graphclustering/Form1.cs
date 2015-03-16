@@ -89,11 +89,6 @@ namespace GraphClustering
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void Form1_Shown(object sender, EventArgs e)
         {
             //First we will figure out the java path, either from settings or input
@@ -158,6 +153,18 @@ namespace GraphClustering
 
         }
 
+
+        #region "Calculate/Update Distances Graph Gen"
+        private void embeddingComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            callCalcDist();
+        }
+
+        private void DistanceMetricSelect_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            callCalcDist();
+        }
+
         private void callCalcDist()
         {
             if (!formLoaded)
@@ -181,7 +188,8 @@ namespace GraphClustering
             else //stacked MSTs
                 calculateSMST(distType);
         }
-
+        
+        
         private void calculateSMST(KPoint.DistType distType)
         {
             points = new PointSet(pointSetFile);
@@ -272,6 +280,8 @@ namespace GraphClustering
             distMax.Text = String.Format("Max:({0}) {1}", trackBar2.Value, distances[trackBar2.Value]);
         }
 
+        #endregion
+
         //This Generates Graphs when clicked
         private void button2_Click(object sender, EventArgs e)
         {
@@ -304,7 +314,11 @@ namespace GraphClustering
             MessageBox.Show("Graphs have been Generated!");
         }
 
-        //Change the Text for each threshold
+        /// <summary>
+        /// Called when the Minimum scroll bar is changed on the graph generation tab
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
             if (distances != null && distances.Count > 0)
@@ -321,6 +335,11 @@ namespace GraphClustering
             }
         }
 
+        /// <summary>
+        /// Called when the Maximum scroll bar is changed on the graph generation tab
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void trackBar2_Scroll(object sender, EventArgs e)
         {
             if (distances != null && distances.Count > 0)
@@ -332,15 +351,7 @@ namespace GraphClustering
             }
         }
 
-        private void embeddingComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            callCalcDist();
-        }
 
-        private void DistanceMetricSelect_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            callCalcDist();
-        }
         
         private void button3_Click(object sender, EventArgs e)
         {

@@ -98,6 +98,12 @@
             this.textBox6 = new System.Windows.Forms.TextBox();
             this.button16 = new System.Windows.Forms.Button();
             this.tabPage9 = new System.Windows.Forms.TabPage();
+            this.label36 = new System.Windows.Forms.Label();
+            this.hVATBetaUpDown = new System.Windows.Forms.NumericUpDown();
+            this.label35 = new System.Windows.Forms.Label();
+            this.hVATAlphaUpDown = new System.Windows.Forms.NumericUpDown();
+            this.label34 = new System.Windows.Forms.Label();
+            this.hVatKNNOffset = new System.Windows.Forms.NumericUpDown();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.hvatUseWeights = new System.Windows.Forms.CheckBox();
             this.hvatHillclimb = new System.Windows.Forms.CheckBox();
@@ -154,12 +160,6 @@
             this.externalEvalClusterFD = new System.Windows.Forms.OpenFileDialog();
             this.externalEvalLabelFD = new System.Windows.Forms.OpenFileDialog();
             this.locateJavaDialog = new System.Windows.Forms.OpenFileDialog();
-            this.label34 = new System.Windows.Forms.Label();
-            this.hVatKNNOffset = new System.Windows.Forms.NumericUpDown();
-            this.label35 = new System.Windows.Forms.Label();
-            this.hVATAlphaUpDown = new System.Windows.Forms.NumericUpDown();
-            this.label36 = new System.Windows.Forms.Label();
-            this.hVATBetaUpDown = new System.Windows.Forms.NumericUpDown();
             this.menuStrip1.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -181,6 +181,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.trackBar3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar4)).BeginInit();
             this.tabPage9.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.hVATBetaUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.hVATAlphaUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.hVatKNNOffset)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown8)).BeginInit();
             this.tabPage1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -190,9 +193,6 @@
             this.tabControl1.SuspendLayout();
             this.tabPage7.SuspendLayout();
             this.tabPage10.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.hVatKNNOffset)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.hVATAlphaUpDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.hVATBetaUpDown)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -999,6 +999,94 @@
             this.tabPage9.Text = "Hierarchical VAT";
             this.tabPage9.UseVisualStyleBackColor = true;
             // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(253, 112);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(29, 13);
+            this.label36.TabIndex = 40;
+            this.label36.Text = "Beta";
+            // 
+            // hVATBetaUpDown
+            // 
+            this.hVATBetaUpDown.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.hVATBetaUpDown.Location = new System.Drawing.Point(293, 110);
+            this.hVATBetaUpDown.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.hVATBetaUpDown.Minimum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            -2147483648});
+            this.hVATBetaUpDown.Name = "hVATBetaUpDown";
+            this.hVATBetaUpDown.Size = new System.Drawing.Size(66, 20);
+            this.hVATBetaUpDown.TabIndex = 39;
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(253, 86);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(34, 13);
+            this.label35.TabIndex = 38;
+            this.label35.Text = "Alpha";
+            // 
+            // hVATAlphaUpDown
+            // 
+            this.hVATAlphaUpDown.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.hVATAlphaUpDown.Location = new System.Drawing.Point(293, 84);
+            this.hVATAlphaUpDown.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.hVATAlphaUpDown.Minimum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            -2147483648});
+            this.hVATAlphaUpDown.Name = "hVATAlphaUpDown";
+            this.hVATAlphaUpDown.Size = new System.Drawing.Size(66, 20);
+            this.hVATAlphaUpDown.TabIndex = 37;
+            this.hVATAlphaUpDown.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(109, 137);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(57, 13);
+            this.label34.TabIndex = 36;
+            this.label34.Text = "Knn Offset";
+            // 
+            // hVatKNNOffset
+            // 
+            this.hVatKNNOffset.Location = new System.Drawing.Point(172, 135);
+            this.hVatKNNOffset.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.hVatKNNOffset.Name = "hVatKNNOffset";
+            this.hVatKNNOffset.Size = new System.Drawing.Size(67, 20);
+            this.hVatKNNOffset.TabIndex = 35;
+            // 
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
@@ -1591,94 +1679,6 @@
             this.locateJavaDialog.FileName = "java.exe";
             this.locateJavaDialog.Filter = "Java exe (java.exe)|java.exe";
             // 
-            // label34
-            // 
-            this.label34.AutoSize = true;
-            this.label34.Location = new System.Drawing.Point(109, 137);
-            this.label34.Name = "label34";
-            this.label34.Size = new System.Drawing.Size(57, 13);
-            this.label34.TabIndex = 36;
-            this.label34.Text = "Knn Offset";
-            // 
-            // hVatKNNOffset
-            // 
-            this.hVatKNNOffset.Location = new System.Drawing.Point(172, 135);
-            this.hVatKNNOffset.Maximum = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            this.hVatKNNOffset.Name = "hVatKNNOffset";
-            this.hVatKNNOffset.Size = new System.Drawing.Size(67, 20);
-            this.hVatKNNOffset.TabIndex = 35;
-            // 
-            // label35
-            // 
-            this.label35.AutoSize = true;
-            this.label35.Location = new System.Drawing.Point(253, 86);
-            this.label35.Name = "label35";
-            this.label35.Size = new System.Drawing.Size(34, 13);
-            this.label35.TabIndex = 38;
-            this.label35.Text = "Alpha";
-            // 
-            // hVATAlphaUpDown
-            // 
-            this.hVATAlphaUpDown.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            196608});
-            this.hVATAlphaUpDown.Location = new System.Drawing.Point(293, 84);
-            this.hVATAlphaUpDown.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.hVATAlphaUpDown.Minimum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            -2147483648});
-            this.hVATAlphaUpDown.Name = "hVATAlphaUpDown";
-            this.hVATAlphaUpDown.Size = new System.Drawing.Size(66, 20);
-            this.hVATAlphaUpDown.TabIndex = 37;
-            this.hVATAlphaUpDown.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            // 
-            // label36
-            // 
-            this.label36.AutoSize = true;
-            this.label36.Location = new System.Drawing.Point(253, 112);
-            this.label36.Name = "label36";
-            this.label36.Size = new System.Drawing.Size(29, 13);
-            this.label36.TabIndex = 40;
-            this.label36.Text = "Beta";
-            // 
-            // hVATBetaUpDown
-            // 
-            this.hVATBetaUpDown.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            196608});
-            this.hVATBetaUpDown.Location = new System.Drawing.Point(293, 110);
-            this.hVATBetaUpDown.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.hVATBetaUpDown.Minimum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            -2147483648});
-            this.hVATBetaUpDown.Name = "hVATBetaUpDown";
-            this.hVATBetaUpDown.Size = new System.Drawing.Size(66, 20);
-            this.hVATBetaUpDown.TabIndex = 39;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1690,7 +1690,6 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Graph Clustering";
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.Shown += new System.EventHandler(this.Form1_Shown);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -1721,6 +1720,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.trackBar4)).EndInit();
             this.tabPage9.ResumeLayout(false);
             this.tabPage9.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.hVATBetaUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.hVATAlphaUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.hVatKNNOffset)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown8)).EndInit();
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
@@ -1734,9 +1736,6 @@
             this.tabPage7.PerformLayout();
             this.tabPage10.ResumeLayout(false);
             this.tabPage10.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.hVatKNNOffset)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.hVATAlphaUpDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.hVATBetaUpDown)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -35,7 +35,7 @@ namespace NetMining.Graphs
                 LightWeightGraph gItter = new LightWeightGraph(g, removedNodes);
 
                 //get the betweeness
-                float[] BC = BetweenessCentrality.BrandesBc(gItter);
+                float[] BC = BetweenessCentrality.BrandesBcNodes(gItter);
 
                 //get the index of the maximum
                 int indexMaxBC = BC.IndexOfMax();
