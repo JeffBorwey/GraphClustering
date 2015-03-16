@@ -656,8 +656,8 @@ namespace NetMining.Graphs
         {
             internal readonly int Id;
             internal int Label;
-            internal int[] Edge;
-            internal float[] EdgeWeights; //if null do nothing
+            public int[] Edge;
+            public float[] EdgeWeights; //if null do nothing
             internal float NodeWeight;
             internal int Count;
             //holds the edge offset for this node, based upon the simple edge indexing scheme

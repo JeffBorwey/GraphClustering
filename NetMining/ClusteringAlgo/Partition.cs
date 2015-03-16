@@ -84,6 +84,7 @@ namespace NetMining.ClusteringAlgo
         /// of the file</param>
         public void SavePartition(String saveLocation, String dataFile, String metaData)
         {
+            //Assumes .Cluster endinge
             using (StreamWriter sw = new StreamWriter(saveLocation + ".cluster"))
             {
                 if (PartitionDataType == DataType.PointSet)

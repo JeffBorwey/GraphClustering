@@ -13,7 +13,25 @@ namespace debugNetData
     {
         static void Main(string[] args)
         {
-            PointSet swissPoints = new PointSet("SwissRoll.txt");
+            PointSet swissPoints = new PointSet("iris.txt");
+            LightWeightGraph minIris = LightWeightGraph.GetMinKnnGraph(swissPoints.GetDistanceMatrix());
+            var map = minIris.GetEdgeIndexMap();
+            float[] BCEdge = NetMining.Graphs.BetweenessCentrality.BrandesBcEdges(minIris);
+            
+            for (int n = 0; n < minIris.NumNodes; n++)
+            {
+                foreach (int e in minIris.Nodes[n].Edge)
+                {
+                    KeyValuePair<int, int> edge = new KeyValuePair<int, int>(n, e);
+                    if (map.ContainsKey(edge))
+                        Console.WriteLine("{0} {1} = {2}", edge.Key, edge.Value, BCEdge[map[edge]]);
+
+                }
+            }
+            //minSwiss.SaveGML("iris.gml");
+            //minSwiss.SaveGraph("iris.graph");
+            /*
+            minSwiss.SaveGML("SwissRoll.gml");
             HVATClust vClust = new HVATClust(swissPoints, 4, false, true, 1);
             Partition p = vClust.GetPartition();
             p.SavePartition("swissRoll", "SwissRoll.txt", p.MetaData);
@@ -44,6 +62,7 @@ namespace debugNetData
             VAT v2_1 = new VAT(lwg2_1);
             List<List<int>> components2_1 = v2_1.GetAttackedGraphWithReassignment().GetComponents();
 
+            */
 
             Console.ReadKey();
         }
