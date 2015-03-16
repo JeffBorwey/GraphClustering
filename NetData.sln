@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphClustering", "GraphClustering\GraphClustering.csproj", "{8AC9DA5C-D466-4F79-8E48-7622C8F53FE1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetMining", "NetMining\NetMining.csproj", "{EBBB04DF-FED3-469A-936F-6A92C7010BCA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "debugNetData", "debugNetData\debugNetData.csproj", "{21E975B3-A8F6-4A54-9716-3463EA659877}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8AC9DA5C-D466-4F79-8E48-7622C8F53FE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AC9DA5C-D466-4F79-8E48-7622C8F53FE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AC9DA5C-D466-4F79-8E48-7622C8F53FE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AC9DA5C-D466-4F79-8E48-7622C8F53FE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBBB04DF-FED3-469A-936F-6A92C7010BCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBBB04DF-FED3-469A-936F-6A92C7010BCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBBB04DF-FED3-469A-936F-6A92C7010BCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBBB04DF-FED3-469A-936F-6A92C7010BCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21E975B3-A8F6-4A54-9716-3463EA659877}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21E975B3-A8F6-4A54-9716-3463EA659877}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21E975B3-A8F6-4A54-9716-3463EA659877}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21E975B3-A8F6-4A54-9716-3463EA659877}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

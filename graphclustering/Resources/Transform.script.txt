@@ -1,0 +1,11 @@
+public class Transform
+{
+    public double[] doTransform(double x, double y)
+    {
+        double[] dim = new double[<numDim>];
+
+        <transform>
+
+        return dim;
+    }
+}

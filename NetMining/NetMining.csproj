@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{EBBB04DF-FED3-469A-936F-6A92C7010BCA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NetMining</RootNamespace>
+    <AssemblyName>NetMining</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ADT\DisjointSet.cs" />
+    <Compile Include="ADT\IndexedItem.cs" />
+    <Compile Include="ADT\MinHeapDikstra.cs" />
+    <Compile Include="ADT\MinHeapPriorityQueue.cs" />
+    <Compile Include="ADT\QuadTree.cs" />
+    <Compile Include="ClusteringAlgo\Cluster.cs" />
+    <Compile Include="ClusteringAlgo\ClusteredItem.cs" />
+    <Compile Include="ClusteringAlgo\HVATClust.cs" />
+    <Compile Include="ClusteringAlgo\IClusteringAlgorithm.cs" />
+    <Compile Include="ClusteringAlgo\KMeans.cs" />
+    <Compile Include="ClusteringAlgo\VATClust.cs" />
+    <Compile Include="Data\DimensionalityReduction\PCA.cs" />
+    <Compile Include="Data\LabelList.cs" />
+    <Compile Include="Data\PointSet.cs" />
+    <Compile Include="Data\DistanceMatrix.cs" />
+    <Compile Include="Evaluation\ExternalEval.cs" />
+    <Compile Include="Evaluation\InternalEval.cs" />
+    <Compile Include="ExtensionMethods\ListExtensions.cs" />
+    <Compile Include="ExtensionMethods\StringExtensions.cs" />
+    <Compile Include="Files\DelimitedFile.cs" />
+    <Compile Include="Graphs\BetweenessCentrality.cs" />
+    <Compile Include="Graphs\BFSProvider.cs" />
+    <Compile Include="Graphs\DikstraProvider2.cs" />
+    <Compile Include="Graphs\EdgeValuePair.cs" />
+    <Compile Include="Graphs\LightWeightGraph.cs" />
+    <Compile Include="Graphs\ShortestPathProvider.cs" />
+    <Compile Include="Data\KPoint.cs" />
+    <Compile Include="ClusteringAlgo\Partition.cs" />
+    <Compile Include="Graphs\VAT.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SOM\LazySOMCluster.cs" />
+    <Compile Include="SOM\HexagonalSelfOrganizingMap.cs" />
+    <Compile Include="SOM\SelfOrganizingMap.cs" />
+    <Compile Include="SOM\SOMLearningSchedule.cs" />
+    <Compile Include="SOM\SOMNeuron.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
