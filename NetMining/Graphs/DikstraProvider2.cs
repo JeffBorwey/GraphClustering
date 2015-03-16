@@ -52,7 +52,7 @@ namespace NetMining.Graphs
                         fromList[toIndex].Clear();
                         fromList[toIndex].Add(uIndex);
                         numberOfShortestPaths[toIndex] = numberOfShortestPaths[uIndex];
-                        if (to.HeapIndex == -1) //forst encounter
+                        if (to.HeapIndex == -1) //first encounter
                         {
                             minHeap.addItem(to);
                         }

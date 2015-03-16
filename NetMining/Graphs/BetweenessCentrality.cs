@@ -16,7 +16,6 @@ namespace NetMining.Graphs
                 //Get a shortest path, if weighted use Dikstra, if unweighted use BFS
                 ShortestPathProvider asp = (g.IsWeighted) ? new DikstraProvider2(g, v) : 
                                                             new BFSProvider(g,v) as ShortestPathProvider;
-
                 float[] delta = new float[numnodes];
                 
                 while (asp.S.Count > 0)
@@ -39,6 +38,11 @@ namespace NetMining.Graphs
             return bcMap;
         }
 
+        /// <summary>
+        /// Calculates Betweeness centrality of the edges in an undirected graph
+        /// </summary>
+        /// <param name="g"></param>
+        /// <returns></returns>
         public static float[] BrandesBcEdges(LightWeightGraph g)
         {
             var edgeMap = g.GetEdgeIndexMap();
@@ -52,7 +56,7 @@ namespace NetMining.Graphs
                 ShortestPathProvider asp = (g.IsWeighted) ? new DikstraProvider2(g, v) :
                                                             new BFSProvider(g, v) as ShortestPathProvider;
 
-                float[] deltaEdge = new float[numEdges];
+                //numberOfShortestPaths = sigma
                 float[] deltaNode= new float[numNodes];
                 while (asp.S.Count > 0)
                 {
@@ -68,7 +72,7 @@ namespace NetMining.Graphs
                         int edgeIndex = edgeMap[edgeNodePair];
                         float contribution = asp.numberOfShortestPaths[n] * coeff;
                         bcEdge[edgeIndex] += contribution;
-                        deltaNode[w] += contribution;
+                        deltaNode[n] += contribution;
                     }
                     //Add the betweeness contribution to W
                     if (v != w)
