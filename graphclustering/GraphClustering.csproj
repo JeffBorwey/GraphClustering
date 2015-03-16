@@ -57,7 +57,6 @@
     <Compile Include="DataDisplayForm.Designer.cs">
       <DependentUpon>DataDisplayForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ExtensionMethods\ListExtensions.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
