@@ -178,13 +178,14 @@ namespace NetMining.Graphs
         public static LightWeightGraph GetMinKnnGraph(DistanceMatrix distances, int add = 0)
         {
             int pointCount = distances.Count;
-            int minK = BinSearchKNNMinConnectivity(1, pointCount - 1, pointCount, distances) + add;
-
+            //int minK = BinSearchKNNMinConnectivity(1, pointCount - 1, pointCount, distances) + add;
+            int minK = BinSearchKNNMin2(1, distances.Count - 1, distances);
             if (minK >= distances.Count)
                 minK = distances.Count - 1;
             return GetKNNGraph(distances, minK);
         }
 
+        //Depreciated
         public static int BinSearchKNNMinConnectivity(int min, int max, int pointCount, DistanceMatrix distance)
         {
             int mid = (min + max) / 2;
@@ -210,6 +211,55 @@ namespace NetMining.Graphs
             }
 
             return 0;
+        }
+
+        /// <summary>
+        /// This function performs a 1 sided quadratic search to find the min connected KNN graph
+        /// It also makes
+        /// </summary>
+        /// <param name="min">this should be 1</param>
+        /// <param name="max">this should be n-1</param>
+        /// <param name="distance">Pairwise distance matrix</param>
+        /// <returns>Returns an the minimum k which produces a connected knn graph</returns>
+        public static int BinSearchKNNMin2(int min, int max, DistanceMatrix distance)
+        {
+            int highestDisconnected = min;
+            int lowestConnected = max;
+
+            //This dictionary is used to store results so recalculations are not needed
+            Dictionary<int, bool> connectedDict = new Dictionary<int, bool>();
+            int inc = 1;
+            for (int i = min; i < max; i += (inc*inc))
+            {
+                if (i > lowestConnected)
+                {
+                    inc = 1;
+                    i = highestDisconnected;
+                    continue;
+                }
+
+                if (connectedDict.ContainsKey(i))
+                    continue;
+
+                bool isConn = KNNGraphIsConnected(distance, i);
+                connectedDict.Add(i, isConn);
+
+                if (isConn && i < lowestConnected)
+                {
+                    lowestConnected = i;
+                    if (connectedDict.ContainsKey(lowestConnected - 1) && !connectedDict[lowestConnected - 1])
+                        return lowestConnected;
+                }
+                else if (!isConn && i > highestDisconnected) 
+                { 
+                    highestDisconnected = i;
+                    if (connectedDict.ContainsKey(highestDisconnected + 1) && connectedDict[highestDisconnected + 1])
+                        return highestDisconnected + 1;
+                }
+                inc++;
+            }
+
+            return lowestConnected;
         }
 
         public static LightWeightGraph GetMinGeoGraph(DistanceMatrix distances)
@@ -353,10 +403,18 @@ namespace NetMining.Graphs
                         break;
 
                     Tuple<int, double> e = heap.extractMin();
-                    if (!addedEdges.Contains(new Tuple<int, int>(e.Item1, i)))
+
+                    Tuple<int, int> edgeNodePair = (e.Item1 < i)
+                            ? new Tuple<int, int>(e.Item1, i)
+                            : new Tuple<int, int>(i, e.Item1);
+
+
+                    //if (!addedEdges.Contains(edgeNodePair))
+                    if (!addedEdges.Contains(edgeNodePair))
                     {
                         //make sure we don't add this edge again in the future
-                        addedEdges.Add(new Tuple<int, int>(i, e.Item1));
+                        //addedEdges.Add(edgeNodePair);
+                        addedEdges.Add(edgeNodePair);
                         //Add the double edge now
                         edgeLists[i].Add(e.Item1);
                         edgeLists[e.Item1].Add(i);

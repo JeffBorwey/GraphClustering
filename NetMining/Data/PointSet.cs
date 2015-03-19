@@ -99,16 +99,18 @@ namespace NetMining.Data
             public KPoint Min, Max;
         }
 
-        public PointSet(String filename)
+        public PointSet(String filename) : this(new DelimitedFile(filename))
+        {
+        }
+
+        public PointSet(DelimitedFile parsedFile)
         {
             PointList = new List<KPoint>();
-
-            DelimitedFile parsedFile = new DelimitedFile(filename);
             var numAttributes = parsedFile.Data[0].Length;
             foreach (var stringArray in parsedFile.Data)
             {
-               if (stringArray.Length != numAttributes)
-                   throw new InvalidDataException("Non-Constant number of attributes");
+                if (stringArray.Length != numAttributes)
+                    throw new InvalidDataException("Non-Constant number of attributes");
 
                 double[] points = stringArray.Select(double.Parse).ToArray();
                 PointList.Add(new KPoint(points));

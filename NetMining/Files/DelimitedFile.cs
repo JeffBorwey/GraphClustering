@@ -34,7 +34,16 @@ namespace NetMining.Files
 
         }
 
+        public DelimitedFile RemoveColumns(List<int> removeIndex)
+        {
+            List<String[]> data = Data.Select(strings => strings.Where((t, i) => !removeIndex.Contains(i)).ToArray()).ToList();
+            return new DelimitedFile(data);
+        }
 
+        private DelimitedFile(List<String[]> data)
+        {
+            Data = data;
+        }
 
         public String[] GetColumn(int i)
         {
