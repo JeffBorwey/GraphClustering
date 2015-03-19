@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NetMining.Files;
-
+using MathNet.Numerics.LinearAlgebra;
 namespace NetMining.Data
 {
     /// <summary>
