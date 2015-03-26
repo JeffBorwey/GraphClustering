@@ -1,30 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using NetMining.ClusteringAlgo;
 using NetMining.ExtensionMethods;
 namespace NetMining.Graphs
 {
-    public class VAT
+    public class VAT : IClusteringAlgorithm
     {
-        internal bool[] removedNodes;
-        internal LightWeightGraph g;
-        internal List<int> nodeRemovalOrder;
+        private readonly bool[] _removedNodes;
+        private LightWeightGraph g;
+        public readonly List<int> NodeRemovalOrder;
 
-        internal int numNodesRemoved = 0;
-        internal float minVat = float.MaxValue;//This will hold the best score so far
-        internal float alpha, beta;
+        public readonly int NumNodesRemoved;
+
+        private readonly float _minVat = float.MaxValue;//This will hold the best score so far
+        public readonly float Alpha, Beta;
+
+        public float MinVat
+        {
+            get { return _minVat; }
+        }
+
+        private readonly bool _reassignNodes;
         //Vat computes given a graph
-        public VAT(LightWeightGraph lwg, float alpha = 1.0f, float beta = 0.0f)
+        public VAT(LightWeightGraph lwg, bool reassignNodes = true, float alpha = 1.0f, float beta = 0.0f)
         {
             //set our alpha and beta variables
-            this.alpha = alpha; this.beta = beta;
+            Alpha = alpha; Beta = beta;
 
             //first we set our variables up
-            removedNodes = new bool[lwg.NumNodes];
-            nodeRemovalOrder = new List<int>();
+            _removedNodes = new bool[lwg.NumNodes];
+            NodeRemovalOrder = new List<int>();
+            _reassignNodes = reassignNodes;
+
             //We will make a copy of the graph and set the label equal to the index
-            g = new LightWeightGraph(lwg, removedNodes);
+            g = new LightWeightGraph(lwg, _removedNodes);
             for (int i = 0; i < g.NumNodes; i++)
                 g.Nodes[i].Label = i;
 
@@ -32,40 +42,40 @@ namespace NetMining.Graphs
             for (int n = 0; n < g.NumNodes / 2; n++)  // this was 32, I think a typo?
             {
                 //get the graph
-                LightWeightGraph gItter = new LightWeightGraph(g, removedNodes);
+                LightWeightGraph gItter = new LightWeightGraph(g, _removedNodes);
 
                 //get the betweeness
-                float[] BC = BetweenessCentrality.BrandesBcNodes(gItter);
+                float[] betweeness = BetweenessCentrality.BrandesBcNodes(gItter);
 
                 //get the index of the maximum
-                int indexMaxBC = BC.IndexOfMax();
-                int labelOfMax = gItter.Nodes[indexMaxBC].Label;
+                int indexMaxBetweeness = betweeness.IndexOfMax();
+                int labelOfMax = gItter.Nodes[indexMaxBetweeness].Label;
 
                 //now we should add it to our list 
-                nodeRemovalOrder.Add(labelOfMax);
-                removedNodes[labelOfMax] = true;
+                NodeRemovalOrder.Add(labelOfMax);
+                _removedNodes[labelOfMax] = true;
                 //calculate vat and update the record
-                float vat = CalculateVAT(removedNodes);
-                if (vat < minVat)
+                float vat = CalculateVAT(_removedNodes);
+                if (vat < _minVat)
                 {
-                    minVat = vat;
-                    numNodesRemoved = n + 1;
+                    _minVat = vat;
+                    NumNodesRemoved = n + 1;
                 }
                 Console.WriteLine("Node {0} removed", n);
             }
 
             //Now we need to set up S to reflect the actual minimum
-            for (int i = 0; i < removedNodes.Length; i++)
-                removedNodes[i] = false;
-            for (int i = 0; i < numNodesRemoved; i++)
-                removedNodes[nodeRemovalOrder[i]] = true;
+            for (int i = 0; i < _removedNodes.Length; i++)
+                _removedNodes[i] = false;
+            for (int i = 0; i < NumNodesRemoved; i++)
+                _removedNodes[NodeRemovalOrder[i]] = true;
 
             //hillclimbing would go here
         }
 
         public LightWeightGraph GetAttackedGraph()
         {
-            return new LightWeightGraph(g, removedNodes);
+            return new LightWeightGraph(g, _removedNodes);
         }
 
         //Clean up with GetComponents
@@ -90,7 +100,7 @@ namespace NetMining.Graphs
             int[] componentIndex = new int[g.NumNodes];
 
             //This will provide our visited flags for BFS
-            bool[] isVisited = (bool[])removedNodes.Clone();
+            bool[] isVisited = (bool[])_removedNodes.Clone();
 
             int componentId = 1;
             Queue<int> q = new Queue<int>();
@@ -117,9 +127,9 @@ namespace NetMining.Graphs
             }
 
             //Assign the nodes to a component based on degree count
-            for (int i = 0; i < numNodesRemoved; i++)
+            for (int i = 0; i < NumNodesRemoved; i++)
             {
-                int n = nodeRemovalOrder[i];
+                int n = NodeRemovalOrder[i];
                 int[] componentDegreeCount = new int[componentId];
                 for (int e = 0; e < g.Nodes[n].Edge.Count(); e++)
                 {
@@ -162,89 +172,44 @@ namespace NetMining.Graphs
             return new LightWeightGraph(nodes, g.IsWeighted);
         }
 
-        //convert to using lwg.GetComponents
-        public String GetClusters()
+        public Partition GetPartition()
         {
-            StringBuilder sb = new StringBuilder();
+            LightWeightGraph lwg = (_reassignNodes) ? GetAttackedGraphWithReassignment() : GetAttackedGraph();
 
-            //This will provide our visited flags for BFS
-            bool[] isVisited = (bool[])removedNodes.Clone();
+            //Get our cluster Assignment
+            List<List<int>> componentList = lwg.GetComponents();
 
-            int componentId = 0;
-            Queue<int> q = new Queue<int>();
-            for (int i = 0; i < g.NumNodes; i++)
+            //Setup our Clusters
+            List<Cluster> clusterList = new List<Cluster>();
+            for (int i = 0; i < componentList.Count; i++)
             {
-                if (!isVisited[i])
+                Cluster c = new Cluster(i);
+                foreach (var n in componentList[i])
                 {
-                    //BFS to count the size of the component
-                    sb.AppendLine("Cluster ID: " + componentId.ToString());
-                    q.Enqueue(i);
-                    isVisited[i] = true;
-                    while (q.Count > 0)
-                    {
-                        int v = q.Dequeue();
-                        sb.Append(v.ToString() + " ");
-                        foreach (int u in g.Nodes[v].Edge)
-                            if (!isVisited[u])
-                            {
-                                q.Enqueue(u);
-                                isVisited[u] = true;
-                            }
-                    }
-                    sb.AppendLine();
-                    componentId++;
+                    c.AddPoint(new ClusteredItem(lwg[n].Label));
                 }
+                clusterList.Add(c);
             }
 
-            sb.AppendLine(); sb.AppendLine(); sb.AppendLine("Removed Nodes: ");
+            String meta = "VAT: \nRemoved Count:" + NumNodesRemoved + "\n"
+                          + String.Join(",", NodeRemovalOrder.GetRange(0, NumNodesRemoved));
 
-            for (int i = 0; i < numNodesRemoved; i++)
-                sb.Append(nodeRemovalOrder[i].ToString() + " ");
-
-            return sb.ToString();
+            return new Partition(clusterList, g, meta);
         }
 
         //Use GetComponents
-        private float CalculateVAT(bool[] S)
+        private float CalculateVAT(bool[] s)
         {
-            //This will provide our visited flags for BFS
-            bool[] isVisited = (bool[])S.Clone();
-
             //We must get the size of S
-            int sizeS = S.Count(c => c);
+            bool[] sClone = (bool[]) s.Clone();
+            int sizeS = s.Count(c => c);
 
-            if (sizeS == 0)
-                return float.MaxValue;
+            //find the maximum sized component in the attacked graph
+            var components = g.GetComponents(previsitedList: sClone);
+            int cMax = components.Select(c => c.Count).Max();
 
-
-            int cMax = 0;
-            Queue<int> q = new Queue<int>();
-            for (int i = 0; i < g.NumNodes; i++)
-            {
-                if (!isVisited[i])
-                {
-                    //BFS to count the size of the component
-                    int sizeComponent = 0;
-
-                    q.Enqueue(i);
-                    isVisited[i] = true;
-                    while (q.Count > 0)
-                    {
-                        int v = q.Dequeue();
-                        sizeComponent++;
-                        foreach (int u in g.Nodes[v].Edge)
-                            if (!isVisited[u])
-                            {
-                                q.Enqueue(u);
-                                isVisited[u] = true;
-                            }
-                    }
-                    cMax = Math.Max(cMax, sizeComponent);
-                }
-            }
-
-            //return (float)sizeS / (float)(g.numNodes - sizeS - cMax + 1);
-            return (float)(alpha * sizeS + beta) / (float)(g.NumNodes - sizeS - cMax + 1);
+            //calculate VAT
+            return (Alpha * sizeS + Beta) / (g.NumNodes - sizeS - cMax + 1.0f);
         }
     }
 }

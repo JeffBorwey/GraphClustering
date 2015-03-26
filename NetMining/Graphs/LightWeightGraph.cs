@@ -16,32 +16,7 @@ namespace NetMining.Graphs
         public int NumNodes;
         public Boolean IsWeighted;
 
-        public static bool GeoGraphIsConnected(DistanceMatrix distances, float threshold)
-        {
-            return GetGeometricGraph(distances, threshold).isConnected();
-        }
-
-        public static bool KNNGraphIsConnected(DistanceMatrix distances, int neighbors)
-        {
-            return GetKNNGraph(distances, neighbors).isConnected();
-        }
-
-        public GraphStringRep getGSR()
-        {
-            GraphStringRep gsr = new GraphStringRep();
-
-            for (int i = 0; i < NumNodes; i++)
-            {
-                List<EdgeValuePair<String>> l = new List<EdgeValuePair<String>>();
-                gsr.Add(l);
-                l.Add(new EdgeValuePair<String>(i.ToString(), 1));
-                foreach (var a in Nodes[i].Edge)
-                    l.Add(new EdgeValuePair<String>(a.ToString(), 1));
-            }
-
-            return gsr;
-        }
-
+        #region "Constructors"
         public LightWeightGraph()
         {
             Nodes = new LightWeightNode[1];
@@ -50,64 +25,11 @@ namespace NetMining.Graphs
             IsWeighted = false;
         }
 
-        //Threshold based
-        public static LightWeightGraph GetGeometricGraph(DistanceMatrix distances, float threshold)
-        {
-            //construct the geo graph
-            int numNodes = distances.Count;
-            var nodes = new LightWeightNode[numNodes];
-
-            List<int>[] edges = new List<int>[numNodes];
-            List<float>[] weights = new List<float>[numNodes];
-            for (int i = 0; i < numNodes; i++)
-                edges[i] = new List<int>();
-            //Add Edges
-            for (int i = 0; i < numNodes - 1; i++)
-            {
-                for (int j = i + 1; j < numNodes; j++)
-                    if (distances[i, j] <= threshold)
-                    {
-                        edges[i].Add(j);
-                        edges[j].Add(i);
-                    }
-            }
-            for (int i = 0; i < numNodes; i++)
-                nodes[i] = new LightWeightNode(i, true, edges[i], weights[i]);
-
-            return new LightWeightGraph(nodes, true);
-        }
-
-        internal LightWeightGraph(LightWeightNode[] nodes, Boolean isWeighted)
+        public LightWeightGraph(LightWeightNode[] nodes, Boolean isWeighted)
         {
             Nodes = nodes;
             NumNodes = nodes.Length;
             IsWeighted = isWeighted;
-        }
-
-        /// <summary>
-        /// Constructs a map from a 2 node pair to the edge index
-        /// </summary>
-        /// <returns>Returns a dictionary mapping edges to indexes</returns>
-        public Dictionary<KeyValuePair<int, int>, int> GetEdgeIndexMap()
-        {
-            var map = new Dictionary<KeyValuePair<int, int>, int>();
-
-            foreach (var node in Nodes)
-            {
-                foreach (int edgeTo in node.Edge.Where(edgeTo => node.Id < edgeTo))
-                {
-                    map.Add(new KeyValuePair<int, int>(node.Id, edgeTo), map.Count);
-                }
-            }
-
-            return map;
-        }
-
-        class distXY
-        {
-            internal readonly int X, Y;
-            internal double Dist;
-            public distXY(int x, int y, double dist) { X = x; Y = y; Dist = dist; }
         }
 
         //construct a subgraph using some exclusion rules
@@ -168,133 +90,46 @@ namespace NetMining.Graphs
             for (int i = 0; i < NumNodes; i++)
                 Nodes[i] = new LightWeightNode(i, oldLabel[i], lwg.IsWeighted, edgesList[i], (IsWeighted) ? edgeWeightList[i] : null);
         }
+        #endregion
 
-        /// <summary>
-        /// Creates a minimum connectivity KNN Graph with an offset(if supplied
-        /// </summary>
-        /// <param name="distances">Distance matrix</param>
-        /// <param name="add">Offset to K to create graphs that are less(negative) or more connected(positive)</param>
-        /// <returns></returns>
-        public static LightWeightGraph GetMinKnnGraph(DistanceMatrix distances, int add = 0)
+        #region "Graph Generators"
+        public static bool GeoGraphIsConnected(DistanceMatrix distances, float threshold)
         {
-            int pointCount = distances.Count;
-            //int minK = BinSearchKNNMinConnectivity(1, pointCount - 1, pointCount, distances) + add;
-            int minK = BinSearchKNNMin2(1, distances.Count - 1, distances);
-            if (minK >= distances.Count)
-                minK = distances.Count - 1;
-            return GetKNNGraph(distances, minK);
+            return GetGeometricGraph(distances, threshold).isConnected();
         }
 
-        //Depreciated
-        public static int BinSearchKNNMinConnectivity(int min, int max, int pointCount, DistanceMatrix distance)
+        public static bool KNNGraphIsConnected(DistanceMatrix distances, int neighbors)
         {
-            int mid = (min + max) / 2;
+            return GetKNNGraph(distances, neighbors).isConnected();
+        }
 
-            if (mid > 0)
+        //Threshold based
+        public static LightWeightGraph GetGeometricGraph(DistanceMatrix distances, float threshold)
+        {
+            //construct the geo graph
+            int numNodes = distances.Count;
+            var nodes = new LightWeightNode[numNodes];
+
+            List<int>[] edges = new List<int>[numNodes];
+            List<float>[] weights = new List<float>[numNodes];
+            for (int i = 0; i < numNodes; i++)
+                edges[i] = new List<int>();
+            //Add Edges
+            for (int i = 0; i < numNodes - 1; i++)
             {
-                Boolean graphUpIsCon = KNNGraphIsConnected(distance, mid);//graph.isConnected();
-
-                Boolean graphDownIsCon = KNNGraphIsConnected(distance, mid - 1);
-                if (graphUpIsCon && !graphDownIsCon)
-                {
-                    return mid;
-                }
-
-                if (graphUpIsCon)
-                {//Both are connected, try low end
-                    return BinSearchKNNMinConnectivity(min, mid - 1, pointCount, distance);
-                }
-                if (!graphDownIsCon)
-                {
-                    return BinSearchKNNMinConnectivity(mid + 1, max, pointCount, distance);
-                }
+                for (int j = i + 1; j < numNodes; j++)
+                    if (distances[i, j] <= threshold)
+                    {
+                        edges[i].Add(j);
+                        edges[j].Add(i);
+                    }
             }
+            for (int i = 0; i < numNodes; i++)
+                nodes[i] = new LightWeightNode(i, true, edges[i], weights[i]);
 
-            return 0;
+            return new LightWeightGraph(nodes, true);
         }
 
-        /// <summary>
-        /// This function performs a 1 sided quadratic search to find the min connected KNN graph
-        /// It also makes
-        /// </summary>
-        /// <param name="min">this should be 1</param>
-        /// <param name="max">this should be n-1</param>
-        /// <param name="distance">Pairwise distance matrix</param>
-        /// <returns>Returns an the minimum k which produces a connected knn graph</returns>
-        public static int BinSearchKNNMin2(int min, int max, DistanceMatrix distance)
-        {
-            int highestDisconnected = min;
-            int lowestConnected = max;
-
-            //This dictionary is used to store results so recalculations are not needed
-            Dictionary<int, bool> connectedDict = new Dictionary<int, bool>();
-            int inc = 1;
-            for (int i = min; i < max; i += (inc*inc))
-            {
-                if (i > lowestConnected)
-                {
-                    inc = 1;
-                    i = highestDisconnected;
-                    continue;
-                }
-
-                if (connectedDict.ContainsKey(i))
-                    continue;
-
-                bool isConn = KNNGraphIsConnected(distance, i);
-                connectedDict.Add(i, isConn);
-
-                if (isConn && i < lowestConnected)
-                {
-                    lowestConnected = i;
-                    if (connectedDict.ContainsKey(lowestConnected - 1) && !connectedDict[lowestConnected - 1])
-                        return lowestConnected;
-                }
-                else if (!isConn && i > highestDisconnected) 
-                { 
-                    highestDisconnected = i;
-                    if (connectedDict.ContainsKey(highestDisconnected + 1) && connectedDict[highestDisconnected + 1])
-                        return highestDisconnected + 1;
-                }
-                inc++;
-            }
-
-            return lowestConnected;
-        }
-
-        public static LightWeightGraph GetMinGeoGraph(DistanceMatrix distances)
-        {
-            List<float> distList = distances.GetSortedDistanceList();
-            int minDistanceIndex = BinSearchGeoMinConnectivity(0, distList.Count - 1, distances.Count, distances, distList);
-            return GetGeometricGraph(distances, distList[minDistanceIndex]);
-        }
-
-        public static int BinSearchGeoMinConnectivity(int min, int max, int pointCount, DistanceMatrix distance, List<float> distList)
-        {
-            int mid = (min + max) / 2;
-
-            if (mid > 0)
-            {
-                Boolean graphUpIsCon = GeoGraphIsConnected(distance, distList[mid]);//graph.isConnected();
-
-                Boolean graphDownIsCon = GeoGraphIsConnected(distance, distList[mid - 1]);
-                if (graphUpIsCon && !graphDownIsCon)
-                {
-                    return mid;
-                }
-
-                if (graphUpIsCon && graphDownIsCon)
-                {//Both are connected, try low end
-                    return BinSearchGeoMinConnectivity(min, mid - 1, pointCount, distance, distList);
-                }
-                if (!graphUpIsCon && !graphDownIsCon)
-                {
-                    return BinSearchGeoMinConnectivity(mid + 1, max, pointCount, distance, distList);
-                }
-            }
-
-            return 0;
-        }
 
         //Stacked MST
         public static LightWeightGraph GetStackedMST(DistanceMatrix distances, int numMSTs)
@@ -430,45 +265,136 @@ namespace NetMining.Graphs
             return new LightWeightGraph(nodes, true);
         }
 
-        public List<List<int>> GetComponents(bool sort = true)
+        /// <summary>
+        /// Creates a minimum connectivity KNN Graph with an offset(if supplied
+        /// </summary>
+        /// <param name="distances">Distance matrix</param>
+        /// <param name="add">Offset to K to create graphs that are less(negative) or more connected(positive)</param>
+        /// <returns></returns>
+        public static LightWeightGraph GetMinKnnGraph(DistanceMatrix distances, int add = 0)
         {
-            List<List<int>> componentList = new List<List<int>>();
-            bool[] isVisited = new bool[NumNodes];
+            int pointCount = distances.Count;
+            //int minK = BinSearchKNNMinConnectivity(1, pointCount - 1, pointCount, distances) + add;
+            int minK = BinSearchKNNMin2(1, distances.Count - 1, distances);
+            if (minK >= distances.Count)
+                minK = distances.Count - 1;
+            return GetKNNGraph(distances, minK);
+        }
 
-            Queue<int> q = new Queue<int>();
-            for (int i = 0; i < NumNodes; i++)
+        //Depreciated
+        public static int BinSearchKNNMinConnectivity(int min, int max, int pointCount, DistanceMatrix distance)
+        {
+            int mid = (min + max) / 2;
+
+            if (mid > 0)
             {
-                if (!isVisited[i])
+                Boolean graphUpIsCon = KNNGraphIsConnected(distance, mid);//graph.isConnected();
+
+                Boolean graphDownIsCon = KNNGraphIsConnected(distance, mid - 1);
+                if (graphUpIsCon && !graphDownIsCon)
                 {
-                    List<int> component = new List<int>();
-                    //BFS to count the size of the component
-                    q.Enqueue(i);
-                    isVisited[i] = true;
-                    while (q.Count > 0)
-                    {
-                        int v = q.Dequeue();
-                        component.Add(v);
-                        foreach (int u in Nodes[v].Edge)
-                            if (!isVisited[u])
-                            {
-                                q.Enqueue(u);
-                                isVisited[u] = true;
-                            }
-                    }
-                    if (sort)
-                        component.Sort((a, b) => a.CompareTo(b));
-                    componentList.Add(component);
+                    return mid;
+                }
+
+                if (graphUpIsCon)
+                {//Both are connected, try low end
+                    return BinSearchKNNMinConnectivity(min, mid - 1, pointCount, distance);
+                }
+                if (!graphDownIsCon)
+                {
+                    return BinSearchKNNMinConnectivity(mid + 1, max, pointCount, distance);
                 }
             }
 
-            return componentList;
+            return 0;
         }
 
-        public bool isConnected()
+        /// <summary>
+        /// This function performs a 1 sided quadratic search to find the min connected KNN graph
+        /// It also makes
+        /// </summary>
+        /// <param name="min">this should be 1</param>
+        /// <param name="max">this should be n-1</param>
+        /// <param name="distance">Pairwise distance matrix</param>
+        /// <returns>Returns an the minimum k which produces a connected knn graph</returns>
+        public static int BinSearchKNNMin2(int min, int max, DistanceMatrix distance)
         {
-            return GetComponents().Count == 1;
+            int highestDisconnected = min;
+            int lowestConnected = max;
+
+            //This dictionary is used to store results so recalculations are not needed
+            Dictionary<int, bool> connectedDict = new Dictionary<int, bool>();
+            int inc = 1;
+            for (int i = min; i < max; i += (inc * inc))
+            {
+                if (i > lowestConnected)
+                {
+                    inc = 1;
+                    i = highestDisconnected;
+                    continue;
+                }
+
+                if (connectedDict.ContainsKey(i))
+                    continue;
+
+                bool isConn = KNNGraphIsConnected(distance, i);
+                connectedDict.Add(i, isConn);
+
+                if (isConn && i < lowestConnected)
+                {
+                    lowestConnected = i;
+                    if (connectedDict.ContainsKey(lowestConnected - 1) && !connectedDict[lowestConnected - 1])
+                        return lowestConnected;
+                }
+                else if (!isConn && i > highestDisconnected)
+                {
+                    highestDisconnected = i;
+                    if (connectedDict.ContainsKey(highestDisconnected + 1) && connectedDict[highestDisconnected + 1])
+                        return highestDisconnected + 1;
+                }
+                inc++;
+            }
+
+            return lowestConnected;
         }
 
+        public static LightWeightGraph GetMinGeoGraph(DistanceMatrix distances)
+        {
+            List<float> distList = distances.GetSortedDistanceList();
+            int minDistanceIndex = BinSearchGeoMinConnectivity(0, distList.Count - 1, distances.Count, distances, distList);
+            return GetGeometricGraph(distances, distList[minDistanceIndex]);
+        }
+
+        public static int BinSearchGeoMinConnectivity(int min, int max, int pointCount, DistanceMatrix distance, List<float> distList)
+        {
+            int mid = (min + max) / 2;
+
+            if (mid > 0)
+            {
+                Boolean graphUpIsCon = GeoGraphIsConnected(distance, distList[mid]);//graph.isConnected();
+
+                Boolean graphDownIsCon = GeoGraphIsConnected(distance, distList[mid - 1]);
+                if (graphUpIsCon && !graphDownIsCon)
+                {
+                    return mid;
+                }
+
+                if (graphUpIsCon && graphDownIsCon)
+                {//Both are connected, try low end
+                    return BinSearchGeoMinConnectivity(min, mid - 1, pointCount, distance, distList);
+                }
+                if (!graphUpIsCon && !graphDownIsCon)
+                {
+                    return BinSearchGeoMinConnectivity(mid + 1, max, pointCount, distance, distList);
+                }
+            }
+
+            return 0;
+        }
+        #endregion
+
+        #region "Save and Load from file"
+        #region "GML"
         public void SaveGML(String filename)
         {
             using (StreamWriter sw = new StreamWriter(filename))
@@ -612,15 +538,8 @@ namespace NetMining.Graphs
 
             return new LightWeightGraph(nodes.ToArray(), isWeighted);
         }
-
-
-
-        struct NodeWeightPair
-        {
-            public int Node;
-            public float Weight;
-        }
-
+        #endregion
+        #region ".graph"
         public static LightWeightGraph GetGraphFromFile(String file)
         {
             DelimitedFile parsedFile = new DelimitedFile(file, false, true);
@@ -709,7 +628,110 @@ namespace NetMining.Graphs
             }
         }
 
+        #endregion
+        #region "Graph String Rep"
+        public GraphStringRep GetGraphStringRep()
+        {
+            GraphStringRep gsr = new GraphStringRep();
 
+            for (int i = 0; i < NumNodes; i++)
+            {
+                List<EdgeValuePair<String>> l = new List<EdgeValuePair<String>>();
+                gsr.Add(l);
+                l.Add(new EdgeValuePair<String>(i.ToString(), 1));
+                foreach (var a in Nodes[i].Edge)
+                    l.Add(new EdgeValuePair<String>(a.ToString(), 1));
+            }
+
+            return gsr;
+        }
+        #endregion
+        #endregion
+
+        #region "Utility"
+        public List<List<int>> GetComponents(bool sort = true, bool[] previsitedList = null)
+        {
+            List<List<int>> componentList = new List<List<int>>();
+            bool[] isVisited = previsitedList ?? new bool[NumNodes];
+
+            Queue<int> q = new Queue<int>();
+            for (int i = 0; i < NumNodes; i++)
+            {
+                if (!isVisited[i])
+                {
+                    List<int> component = new List<int>();
+                    //BFS to count the size of the component
+                    q.Enqueue(i);
+                    isVisited[i] = true;
+                    while (q.Count > 0)
+                    {
+                        int v = q.Dequeue();
+                        component.Add(v);
+                        foreach (int u in Nodes[v].Edge)
+                            if (!isVisited[u])
+                            {
+                                q.Enqueue(u);
+                                isVisited[u] = true;
+                            }
+                    }
+                    if (sort)
+                        component.Sort((a, b) => a.CompareTo(b));
+                    componentList.Add(component);
+                }
+            }
+
+            return componentList;
+        }
+
+        public bool isConnected()
+        {
+            return GetComponents().Count == 1;
+        }
+
+        /// <summary>
+        /// Constructs a map from a 2 node pair to the edge index
+        /// </summary>
+        /// <returns>Returns a dictionary mapping edges to indexes</returns>
+        public Dictionary<KeyValuePair<int, int>, int> GetEdgeIndexMap()
+        {
+            var map = new Dictionary<KeyValuePair<int, int>, int>();
+
+            foreach (var node in Nodes)
+            {
+                foreach (int edgeTo in node.Edge.Where(edgeTo => node.Id < edgeTo))
+                {
+                    map.Add(new KeyValuePair<int, int>(node.Id, edgeTo), map.Count);
+                }
+            }
+
+            return map;
+        }
+        #endregion
+
+        #region "Operator Overloads"
+
+        public LightWeightNode this[int i]
+        {
+            get { return Nodes[i]; }
+        }
+
+        #endregion
+
+
+        class distXY
+        {
+            internal readonly int X, Y;
+            internal double Dist;
+            public distXY(int x, int y, double dist) { X = x; Y = y; Dist = dist; }
+        }
+
+        struct NodeWeightPair
+        {
+            public int Node;
+            public float Weight;
+        }
+
+        
         public class LightWeightNode
         {
             internal readonly int Id;

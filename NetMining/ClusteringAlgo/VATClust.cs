@@ -26,7 +26,7 @@ namespace NetMining.ClusteringAlgo
             lwg.IsWeighted = UseWeights;
 
             //Run VAT on it
-            VATResult = new VAT(lwg, _alpha, _beta);
+            VATResult = new VAT(lwg, false, _alpha, _beta);
         }
 
         public Partition GetPartition()
@@ -49,8 +49,8 @@ namespace NetMining.ClusteringAlgo
                 clusterList.Add(c);
             }
 
-            String meta = "VATClust: \nRemoved Count:" + VATResult.numNodesRemoved + "\n"
-                          + String.Join(",", VATResult.nodeRemovalOrder.GetRange(0, VATResult.numNodesRemoved));
+            String meta = "VATClust: \nRemoved Count:" + VATResult.NumNodesRemoved + "\n"
+                          + String.Join(",", VATResult.NodeRemovalOrder.GetRange(0, VATResult.NumNodesRemoved));
 
             return new Partition(clusterList, _distanceMatrix, meta);
         }

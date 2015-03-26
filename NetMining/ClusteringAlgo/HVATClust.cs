@@ -56,10 +56,10 @@ namespace NetMining.ClusteringAlgo
                 float minVatValue = float.MaxValue;
                 foreach (var c in vatMap)
                 {
-                    if (c.Value.VATResult.minVat < minVatValue)
+                    if (c.Value.VATResult.MinVat < minVatValue)
                     {
                         minVatCluster = c.Key;
-                        minVatValue = c.Value.VATResult.minVat;
+                        minVatValue = c.Value.VATResult.MinVat;
                     }
                 }
 
