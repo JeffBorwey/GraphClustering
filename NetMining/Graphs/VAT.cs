@@ -166,7 +166,7 @@ namespace NetMining.Graphs
 
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new LightWeightGraph.LightWeightNode(i, g.IsWeighted, edges[i], edgeWeights[i]);
+                nodes[i] = new LightWeightGraph.LightWeightNode(i ,g.IsWeighted, edges[i], edgeWeights[i]);
             }
 
             return new LightWeightGraph(nodes, g.IsWeighted);

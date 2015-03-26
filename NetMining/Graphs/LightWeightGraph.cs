@@ -10,14 +10,15 @@ namespace NetMining.Graphs
 {
     using GraphStringRep = List<List<EdgeValuePair<String>>>;
 
-    public class LightWeightGraph
+    public class LightWeightGraph : AbstractDataset
     {
         public LightWeightNode[] Nodes;
         public int NumNodes;
         public Boolean IsWeighted;
 
         #region "Constructors"
-        public LightWeightGraph()
+        public LightWeightGraph() 
+            : base(DataType.Graph)
         {
             Nodes = new LightWeightNode[1];
             NumNodes = 1;
@@ -26,6 +27,7 @@ namespace NetMining.Graphs
         }
 
         public LightWeightGraph(LightWeightNode[] nodes, Boolean isWeighted)
+            : base(DataType.Graph)
         {
             Nodes = nodes;
             NumNodes = nodes.Length;
@@ -34,6 +36,7 @@ namespace NetMining.Graphs
 
         //construct a subgraph using some exclusion rules
         public LightWeightGraph(LightWeightGraph lwg, bool[] S)
+            : base(DataType.Graph)
         {
             int sSize = S.Count(c => c);
 
@@ -275,7 +278,7 @@ namespace NetMining.Graphs
         {
             int pointCount = distances.Count;
             //int minK = BinSearchKNNMinConnectivity(1, pointCount - 1, pointCount, distances) + add;
-            int minK = BinSearchKNNMin2(1, distances.Count - 1, distances);
+            int minK = BinSearchKNNMin2(1, distances.Count - 1, distances) + add;
             if (minK >= distances.Count)
                 minK = distances.Count - 1;
             return GetKNNGraph(distances, minK);
@@ -706,6 +709,12 @@ namespace NetMining.Graphs
 
             return map;
         }
+
+        public override int Count
+        {
+            get { return NumNodes; }
+        }
+
         #endregion
 
         #region "Operator Overloads"
@@ -746,6 +755,7 @@ namespace NetMining.Graphs
             public LightWeightNode(int i, Boolean initWeight, List<int> edges, List<float> weights = null)
             {
                 Id = i;
+                Label = i;
                 Edge = edges.ToArray();
                 Count = Edge.Length;
                 if (initWeight)

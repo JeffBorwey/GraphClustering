@@ -10,11 +10,12 @@ namespace NetMining.Data
     /// This Class handles loading data from a comma or tab seperated file
     /// that consists of floating point attributes
     /// </summary>
-    public class PointSet
+    public class PointSet : AbstractDataset
     {
         public List<KPoint> PointList;
         public readonly int Dimensions;
         public PointSet(List<KPoint> data)
+            : base(DataType.PointSet)
         {
             if (data.Count == 0)
                 throw new InvalidDataException("Empty Dataset");
@@ -42,7 +43,7 @@ namespace NetMining.Data
             set { PointList[i] = value; }
         }
 
-        public int Count
+        public override int Count
         {
             get { return PointList.Count; }
         }
@@ -104,6 +105,7 @@ namespace NetMining.Data
         }
 
         public PointSet(DelimitedFile parsedFile)
+            : base(DataType.PointSet)
         {
             PointList = new List<KPoint>();
             var numAttributes = parsedFile.Data[0].Length;

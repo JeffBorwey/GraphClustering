@@ -5,7 +5,7 @@ using NetMining.Files;
 
 namespace NetMining.Data
 {
-    public class DistanceMatrix
+    public class DistanceMatrix : AbstractDataset
     {
         public float[,] Distances;
 
@@ -15,7 +15,10 @@ namespace NetMining.Data
             set { Distances[a, b] = value; }
         }
 
-        public int Count
+        /// <summary>
+        /// Returns the number of data elements
+        /// </summary>
+        public override int Count
         {
             get { return Distances.GetLength(0); }
         }
@@ -24,7 +27,7 @@ namespace NetMining.Data
         /// Creates a distance matrix from an array
         /// </summary>
         /// <param name="mat"></param>
-        public DistanceMatrix(float[,] mat)
+        public DistanceMatrix(float[,] mat) : base(DataType.DistanceMatrix)
         {
             Distances = mat;
         }
@@ -33,7 +36,7 @@ namespace NetMining.Data
         /// Accepts a file and parses it as a distance matrix
         /// </summary>
         /// <param name="filename">Path to the delimited matrix</param>
-        public DistanceMatrix(String filename)
+        public DistanceMatrix(String filename) : base(DataType.DistanceMatrix)
         {
             DelimitedFile parsedFile = new DelimitedFile(filename);
             //parse each line

@@ -13,23 +13,40 @@ namespace NetMining.ClusteringAlgo
     public class Partition
     {
         public List<Cluster> Clusters;
-        public String MetaData;
+        public String MetaData = "";
 
         //Data associated with partition
-        public PointSet Points;
-        public DistanceMatrix Distances;
-        public LightWeightGraph Graph;
+        public AbstractDataset Data;
 
-        //Datatype stored in Partition
-        public enum DataType
+        public PointSet Points
         {
-            PointSet,
-            DistanceMatrix,
-            Graph
-        };
+            get
+            {
+                if (Data.Type == AbstractDataset.DataType.PointSet)
+                    return (PointSet) Data;
+                return null;
+            } 
+        }
 
-        public readonly DataType PartitionDataType;
+        public DistanceMatrix Distances
+        {
+            get
+            {
+                if (Data.Type == AbstractDataset.DataType.DistanceMatrix)
+                    return (DistanceMatrix)Data;
+                return null;
+            }
+        }
 
+        public LightWeightGraph Graph
+        {
+            get
+            {
+                if (Data.Type == AbstractDataset.DataType.Graph)
+                    return (LightWeightGraph)Data;
+                return null;
+            }
+        }
 
         /// <summary>
         /// Merges a sub-partition into the list of clusters
@@ -82,16 +99,16 @@ namespace NetMining.ClusteringAlgo
         /// <param name="dataFile">The path to the dataFile used</param>
         /// <param name="metaData">This is additional information to append to the end
         /// of the file</param>
-        public void SavePartition(String saveLocation, String dataFile, String metaData)
+        public void SavePartition(String saveLocation, String dataFile)
         {
             //Assumes .Cluster endinge
             using (StreamWriter sw = new StreamWriter(saveLocation + ".cluster"))
             {
-                if (PartitionDataType == DataType.PointSet)
+                if (Data.Type == AbstractDataset.DataType.PointSet)
                     sw.WriteLine("Points {0}", dataFile);
-                else if (PartitionDataType == DataType.DistanceMatrix)
+                else if (Data.Type == AbstractDataset.DataType.DistanceMatrix)
                     sw.WriteLine("DistanceMatrix {0}", dataFile);
-                else if (PartitionDataType == DataType.Graph)
+                else if (Data.Type == AbstractDataset.DataType.Graph)
                     sw.WriteLine("Graph {0}", dataFile);
 
                 sw.WriteLine("Clusters {0}", Clusters.Count);
@@ -102,7 +119,7 @@ namespace NetMining.ClusteringAlgo
                         sw.Write("{0} ", p.Id);
                     sw.WriteLine();
                 }
-                sw.WriteLine("Meta {0}", metaData);
+                sw.WriteLine("Meta {0}", MetaData);
             }
         }
 
@@ -112,30 +129,12 @@ namespace NetMining.ClusteringAlgo
         /// <param name="clusters">List of clusters</param>
         /// <param name="data">The dataset used to create the partition</param>
         /// <param name="m">Meta Data about the partition</param>
-        public Partition(List<Cluster> clusters, PointSet data, String m = "")
+        public Partition(List<Cluster> clusters, AbstractDataset data, String m = "")
         {
             Clusters = clusters;
             MetaData = m;
-            Points = data;
-            PartitionDataType = DataType.PointSet;
+            Data = data;
         }
-
-        public Partition(List<Cluster> clusters, DistanceMatrix mat, String m = "")
-        {
-            Clusters = clusters;
-            MetaData = m;
-            Distances = mat;
-            PartitionDataType = DataType.DistanceMatrix;
-        }
-
-        public Partition(List<Cluster> clusters, LightWeightGraph graph, String m = "")
-        {
-            Clusters = clusters;
-            MetaData = m;
-            Graph = graph;
-            PartitionDataType = DataType.Graph;
-        }
-
 
         /// <summary>
         /// Reads a .cluster file into a partition
@@ -156,20 +155,17 @@ namespace NetMining.ClusteringAlgo
                 switch (dataType)
                 {
                     case "Points":
-                        Points = new PointSet(dataFileName);
-                        PartitionDataType = DataType.PointSet;
+                        Data = new PointSet(dataFileName);
                         break;
                     case "DistanceMatrix":
-                        Distances = new DistanceMatrix(dataFileName);
-                        PartitionDataType = DataType.DistanceMatrix;
+                        Data = new DistanceMatrix(dataFileName);
                         break;
                     case "Graph":
                         String extension = dataFileName.Substring(dataFileName.LastIndexOf('.') + 1);
                         if (extension == "gml")
-                            Graph = LightWeightGraph.GetGraphFromGML(dataFileName);
+                            Data = LightWeightGraph.GetGraphFromGML(dataFileName);
                         else if (extension == "graph")
-                            Graph = LightWeightGraph.GetGraphFromFile(dataFileName);
-                        PartitionDataType = DataType.Graph;
+                            Data = LightWeightGraph.GetGraphFromFile(dataFileName);
                         break;
                     default:
                         throw new InvalidDataException("dataType");
@@ -203,16 +199,7 @@ namespace NetMining.ClusteringAlgo
         }
         public int DataCount 
         {
-            get
-            {
-                switch (PartitionDataType)
-                {
-                    case DataType.PointSet:         return Points.Count;
-                    case DataType.Graph:            return Graph.NumNodes;
-                    case DataType.DistanceMatrix:   return Distances.Count;
-                    default: throw new ArgumentOutOfRangeException("PartitionDataType");
-                }
-            }
+            get { return Data.Count; }
         }
     }
 }
