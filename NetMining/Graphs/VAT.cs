@@ -9,12 +9,22 @@ namespace NetMining.Graphs
     {
         private readonly bool[] _removedNodes;
         private LightWeightGraph g;
-        public readonly List<int> NodeRemovalOrder;
+        private List<int> _nodeRemovalOrder;
+        private bool _performedHillClimb = false;
+        private int _numNodesRemoved;
 
-        public readonly int NumNodesRemoved;
-
-        private readonly float _minVat = float.MaxValue;//This will hold the best score so far
+        private float _minVat = float.MaxValue;//This will hold the best score so far
         public readonly float Alpha, Beta;
+
+        public List<int> NodeRemovalOrder
+        {
+            get { return new List<int>(_nodeRemovalOrder); }
+        }
+
+        public int NumNodesRemoved
+        {
+            get { return _numNodesRemoved;}
+        }
 
         public float MinVat
         {
@@ -30,7 +40,7 @@ namespace NetMining.Graphs
 
             //first we set our variables up
             _removedNodes = new bool[lwg.NumNodes];
-            NodeRemovalOrder = new List<int>();
+            _nodeRemovalOrder = new List<int>();
             _reassignNodes = reassignNodes;
 
             //We will make a copy of the graph and set the label equal to the index
@@ -52,14 +62,14 @@ namespace NetMining.Graphs
                 int labelOfMax = gItter.Nodes[indexMaxBetweeness].Label;
 
                 //now we should add it to our list 
-                NodeRemovalOrder.Add(labelOfMax);
+                _nodeRemovalOrder.Add(labelOfMax);
                 _removedNodes[labelOfMax] = true;
                 //calculate vat and update the record
                 float vat = CalculateVAT(_removedNodes);
                 if (vat < _minVat)
                 {
                     _minVat = vat;
-                    NumNodesRemoved = n + 1;
+                    _numNodesRemoved = n + 1;
                 }
                 Console.WriteLine("Node {0} removed", n);
             }
@@ -67,10 +77,48 @@ namespace NetMining.Graphs
             //Now we need to set up S to reflect the actual minimum
             for (int i = 0; i < _removedNodes.Length; i++)
                 _removedNodes[i] = false;
-            for (int i = 0; i < NumNodesRemoved; i++)
-                _removedNodes[NodeRemovalOrder[i]] = true;
+            for (int i = 0; i < _numNodesRemoved; i++)
+                _removedNodes[_nodeRemovalOrder[i]] = true;
 
             //hillclimbing would go here
+        }
+
+        /// <summary>
+        /// Perform 1-d HillClimb to locally optimize VAT.  This will change NodeRemovalOrder to hold only the nodes
+        /// contained in the new optimal calculation
+        /// </summary>
+        public void HillClimb()
+        {
+            if (_performedHillClimb)
+                return;
+            int i = 0;
+            float bestVAT = _minVat;
+            bool[] s = (bool[]) _removedNodes.Clone();
+
+            while (i < g.NumNodes)
+            {
+                //flip a bit and calculate
+                s[i] ^= true;
+                float vat = CalculateVAT(s);
+                if (vat < bestVAT)
+                {
+                    bestVAT = vat;
+                    i = 0;
+                    continue;
+                }
+                //if the result is not an improvement, so reset the bit and increment i
+                s[i++] ^= true;
+            }
+
+            //Set our new results
+            _minVat = bestVAT;
+            _nodeRemovalOrder = new List<int>();
+            for (i = 0; i < g.NumNodes; i++) { 
+                _removedNodes[i] = s[i];
+                if (s[i]) _nodeRemovalOrder.Add(i);
+            }
+            _numNodesRemoved = _removedNodes.Count(c => c);
+            _performedHillClimb = true;
         }
 
         public LightWeightGraph GetAttackedGraph()
@@ -129,7 +177,7 @@ namespace NetMining.Graphs
             //Assign the nodes to a component based on degree count
             for (int i = 0; i < NumNodesRemoved; i++)
             {
-                int n = NodeRemovalOrder[i];
+                int n = _nodeRemovalOrder[i];
                 int[] componentDegreeCount = new int[componentId];
                 for (int e = 0; e < g.Nodes[n].Edge.Count(); e++)
                 {
@@ -192,7 +240,7 @@ namespace NetMining.Graphs
             }
 
             String meta = "VAT: \nRemoved Count:" + NumNodesRemoved + "\n"
-                          + String.Join(",", NodeRemovalOrder.GetRange(0, NumNodesRemoved));
+                          + String.Join(",", _nodeRemovalOrder.GetRange(0, NumNodesRemoved));
 
             return new Partition(clusterList, g, meta);
         }
@@ -203,6 +251,9 @@ namespace NetMining.Graphs
             //We must get the size of S
             bool[] sClone = (bool[]) s.Clone();
             int sizeS = s.Count(c => c);
+
+            if (sizeS == 0)
+                return float.MaxValue;
 
             //find the maximum sized component in the attacked graph
             var components = g.GetComponents(previsitedList: sClone);

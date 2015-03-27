@@ -590,7 +590,7 @@ namespace GraphClustering
                 {
                     KMeans algo = new KMeans(points, j);
                     String newCluster = folder + "/" + pointSetFileShort.Substring(0,pointSetFileShort.LastIndexOf('.')) + "_kmeans" + j + "_" + i;
-                    algo.GetPartition().SavePartition(newCluster, pointSetFile.Substring(pointSetFile.LastIndexOf("\\") + 1), "");
+                    algo.GetPartition().SavePartition(newCluster, pointSetFile.Substring(pointSetFile.LastIndexOf("\\") + 1));
                 }
             }
             MessageBox.Show("Complete!");
@@ -643,7 +643,7 @@ namespace GraphClustering
                 algo.runLargeEpochs(0.05, 3);
 
                 String newCluster = folder + "/" + pointSetFileShort.Substring(0,pointSetFileShort.LastIndexOf('.')) + "_som" + numClust + "_" + i;
-                algo.GetClusterLazy().SavePartition(newCluster, pointSetFile.Substring(pointSetFile.LastIndexOf("\\") + 1), "");
+                algo.GetClusterLazy().SavePartition(newCluster, pointSetFile.Substring(pointSetFile.LastIndexOf("\\") + 1));
             }
             MessageBox.Show("Complete!");
         }
@@ -981,7 +981,7 @@ namespace GraphClustering
 
             //Save the file
             String clusterFileName = pointFileName.GetShortFilename().GetFilenameNoExtension();
-            p.SavePartition(clusterFileName + "_HVAT", pointFileName, "HVat");
+            p.SavePartition(clusterFileName + "_HVAT", pointFileName);
         }
 
         //This selects the Cluster file we want to externally validate

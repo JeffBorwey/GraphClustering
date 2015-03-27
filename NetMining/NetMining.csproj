@@ -54,7 +54,6 @@
     <Compile Include="ClusteringAlgo\HVATClust.cs" />
     <Compile Include="ClusteringAlgo\IClusteringAlgorithm.cs" />
     <Compile Include="ClusteringAlgo\KMeans.cs" />
-    <Compile Include="ClusteringAlgo\VATClust.cs" />
     <Compile Include="Data\AbstractDataset.cs" />
     <Compile Include="Data\DimensionalityReduction\PCA.cs" />
     <Compile Include="Data\LabelList.cs" />
@@ -83,6 +82,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="NewFolder1\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
