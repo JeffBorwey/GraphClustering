@@ -10,13 +10,12 @@ namespace NetMining.Graphs
             int numNodes = g.Nodes.Length;
             numberOfShortestPaths[v] = 1;
             fromList = new List<int>[numNodes]; //List of nodes (we will use this to 
-            //countPostcessors = new int[numNodes]; //This will hold a count of the number of shortestpaths stemming from 
             
             //we must set each node to infinite distance
             for (int i = 0; i < numNodes; i++)
             {
                 g.Nodes[i].NodeWeight = float.MaxValue;
-                fromList[i] = new List<int>(5);
+                fromList[i] = new List<int>(2);
             }
             //now we need to set our node to 0
             g.Nodes[v].NodeWeight = 0.0f;

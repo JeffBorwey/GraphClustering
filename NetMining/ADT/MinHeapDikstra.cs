@@ -57,9 +57,8 @@ namespace NetMining.ADT
             IndexedItem min = items[0]; //Get min item
 
             //set new min to last item
-            items[0] = items[Count - 1];
+            items[0] = items[--Count];
             items[0].HeapIndex = 0;
-            Count--;
 
             //Heapify
             heapifyDown(0);

@@ -26,6 +26,20 @@ namespace NetMining.Graphs
             IsWeighted = false;
         }
 
+        /// <summary>
+        /// Make a deep Copy of a Graph
+        /// </summary>
+        /// <param name="g">LightWeightGraph to copy</param>
+        public LightWeightGraph(LightWeightGraph g)
+            : base(DataType.Graph)
+        {
+            NumNodes = g.NumNodes;
+            Nodes = new LightWeightNode[NumNodes];
+            for (int i = 0; i < NumNodes; i++)
+                Nodes[i] = new LightWeightNode(g[i]);
+            IsWeighted = g.IsWeighted;
+        }
+
         public LightWeightGraph(LightWeightNode[] nodes, Boolean isWeighted)
             : base(DataType.Graph)
         {
@@ -218,7 +232,7 @@ namespace NetMining.Graphs
                 new MinHeapPriorityQueue<Tuple<int, double>>.isGreaterThan((x, y) => { return x.Item2 > y.Item2; });
 
             //Add Edges
-            for (int i = 0; i < numNodes - 1; i++)
+            for (int i = 0; i < numNodes; i++)
             {
                 //get list of edges
                 List<Tuple<int, double>> edges = new List<Tuple<int, double>>();
@@ -767,6 +781,20 @@ namespace NetMining.Graphs
                         for (int j = 0; j < Count; j++)
                             EdgeWeights[j] = 1.0f;
                     }
+            }
+
+            /// <summary>
+            /// Copy Constructor
+            /// </summary>
+            /// <param name="n">LightWeightNode to copy</param>
+            public LightWeightNode(LightWeightNode n)
+            {
+                Id = n.Id;
+                Label = n.Label;
+                Edge = (int[]) n.Edge.Clone();
+                EdgeWeights = (float[]) n.EdgeWeights.Clone();
+                NodeWeight = n.NodeWeight;
+                Count = n.Count;
             }
 
             public LightWeightNode(int i, int label, Boolean initWeight, List<int> edges, List<float> weights = null)

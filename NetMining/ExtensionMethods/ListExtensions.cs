@@ -1,9 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
+using NetMining.Utility;
 
 namespace NetMining.ExtensionMethods
 {
     public static class ListExtensions
     {
+
+        /// <summary>
+        /// Shuffle based on the Fisher-Yates algorithm
+        /// O(n) time complexity
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        public static void Shuffle<T>(this IList<T> data)
+        {
+            Random rng = Util.Rng;
+            int i = data.Count;
+            while (i > 1)
+            {
+                int j = rng.Next(--i + 1);
+                T tmp = data[j];
+                data[j] = data[i];
+                data[i] = tmp;
+            }
+        }
+
         public static int IndexOfMin(this float[] self)
         {
             if (self == null)

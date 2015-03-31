@@ -74,18 +74,18 @@
     <Compile Include="ClusteringAlgo\Partition.cs" />
     <Compile Include="Graphs\VAT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\Threading.cs" />
     <Compile Include="SOM\LazySOMCluster.cs" />
     <Compile Include="SOM\HexagonalSelfOrganizingMap.cs" />
     <Compile Include="SOM\SelfOrganizingMap.cs" />
     <Compile Include="SOM\SOMLearningSchedule.cs" />
     <Compile Include="SOM\SOMNeuron.cs" />
+    <Compile Include="Utility\Util.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="NewFolder1\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

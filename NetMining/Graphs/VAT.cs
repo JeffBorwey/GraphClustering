@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using NetMining.ClusteringAlgo;
 using NetMining.ExtensionMethods;
@@ -35,6 +36,8 @@ namespace NetMining.Graphs
         //Vat computes given a graph
         public VAT(LightWeightGraph lwg, bool reassignNodes = true, float alpha = 1.0f, float beta = 0.0f)
         {
+            Stopwatch sw = new Stopwatch();
+            
             //set our alpha and beta variables
             Alpha = alpha; Beta = beta;
 
@@ -48,15 +51,18 @@ namespace NetMining.Graphs
             for (int i = 0; i < g.NumNodes; i++)
                 g.Nodes[i].Label = i;
 
+            bool threaded = Settings.Threading.ThreadHVAT;
             //This is where our estimate for Vat is calculated
             for (int n = 0; n < g.NumNodes / 2; n++)  // this was 32, I think a typo?
             {
                 //get the graph
                 LightWeightGraph gItter = new LightWeightGraph(g, _removedNodes);
-
+                //sw.Restart();
                 //get the betweeness
-                float[] betweeness = BetweenessCentrality.BrandesBcNodes(gItter);
-
+                float[] betweeness = (threaded) ? BetweenessCentrality.ParallelBrandesBcNodes(gItter) :
+                    BetweenessCentrality.BrandesBcNodes(gItter);
+                //sw.Stop();
+                //Console.WriteLine("{0} {1}ms", n+1, sw.ElapsedMilliseconds);
                 //get the index of the maximum
                 int indexMaxBetweeness = betweeness.IndexOfMax();
                 int labelOfMax = gItter.Nodes[indexMaxBetweeness].Label;
@@ -71,7 +77,6 @@ namespace NetMining.Graphs
                     _minVat = vat;
                     _numNodesRemoved = n + 1;
                 }
-                Console.WriteLine("Node {0} removed", n);
             }
 
             //Now we need to set up S to reflect the actual minimum
@@ -79,7 +84,6 @@ namespace NetMining.Graphs
                 _removedNodes[i] = false;
             for (int i = 0; i < _numNodesRemoved; i++)
                 _removedNodes[_nodeRemovalOrder[i]] = true;
-
             //hillclimbing would go here
         }
 

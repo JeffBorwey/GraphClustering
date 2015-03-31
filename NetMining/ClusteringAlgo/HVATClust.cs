@@ -17,23 +17,24 @@ namespace NetMining.ClusteringAlgo
         private readonly float _alpha;
         private readonly float _beta;
         private readonly int _kNNOffset;
+        private readonly bool _hillClimb;
         private readonly DistanceMatrix _mat;
 
         private StringBuilder meta;
-        public HVATClust(AbstractDataset data, int k, bool weighted = true, bool useKnn = true, int kNNOffset = 0, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true)
-            :this(k, weighted, useKnn, kNNOffset, alpha, beta, reassignNodes)
+        public HVATClust(AbstractDataset data, int k, bool weighted = true, bool useKnn = true, int kNNOffset = 0, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
+            :this(k, weighted, useKnn, kNNOffset, alpha, beta, reassignNodes, hillClimb)
         {
             _data = data;
         }
 
-        public HVATClust(LightWeightGraph data, int k, bool weighted, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true)
-            : this(k, weighted, false, 0, alpha, beta, reassignNodes)
+        public HVATClust(LightWeightGraph data, int k, bool weighted, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
+            : this(k, weighted, false, 0, alpha, beta, reassignNodes, hillClimb)
         {
             _data = data;
         }
 
 
-        private HVATClust(int k, bool weighted, bool useKnn, int kNNOffset = 0, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true)
+        private HVATClust(int k, bool weighted, bool useKnn, int kNNOffset = 0, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
         {
             _minK = k;
             _useKnn = useKnn;
@@ -42,6 +43,7 @@ namespace NetMining.ClusteringAlgo
             _alpha = alpha;
             _beta = beta;
             _reassignNodes = reassignNodes;
+            _hillClimb = hillClimb;
 
             meta = new StringBuilder();
             meta.AppendLine("HVatClust");
@@ -98,6 +100,8 @@ namespace NetMining.ClusteringAlgo
                     subsetMap.Add(c.ClusterId, clusterSubset.ToArray());
                     lwg.IsWeighted = _weighted;
                     VAT v = new VAT(lwg, _reassignNodes, _alpha, _beta);
+                    if (_hillClimb)
+                        v.HillClimb();
                     ////VATClust v = new VATClust(subMatrix.Mat, _weighted, _useKnn, _kNNOffset, _alpha, _beta);
                     vatMap.Add(c.ClusterId, v);
                 }
