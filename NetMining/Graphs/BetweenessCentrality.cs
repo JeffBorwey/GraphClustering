@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using NetMining.ExtensionMethods;
 
 namespace NetMining.Graphs
@@ -28,9 +29,9 @@ namespace NetMining.Graphs
                     foreach (int n in wList)
                     {
                         delta[n] += ((float)asp.numberOfShortestPaths[n] / (float)asp.numberOfShortestPaths[w]) * (1.0f + delta[w]);
-                        if (n != v)
-                            bcMap[n] += delta[n];
                     }
+                    if (w != v)
+                        bcMap[w] += delta[w];
                 }
             }
 
@@ -70,30 +71,28 @@ namespace NetMining.Graphs
             }
             
             //Create our threads use a closure to get our return arrays
-            float[][] threadResults = new float[numThreads][];
-            WaitHandle[] waitHandles = new WaitHandle[numThreads];
+            BetweenessCalc[] threadResults = new BetweenessCalc[numThreads];
+            //ManualResetEvent[] waitHandles = new ManualResetEvent[numThreads];
+            CountdownEvent cde = new CountdownEvent(numThreads);
             for (int t = 0; t < numThreads; t++)
             {
                 int tIndex = t;
-                var handle = new EventWaitHandle(false, EventResetMode.ManualReset);
-                    
-                var thread = new Thread(() =>
-                {
-                    LightWeightGraph gCopy = new LightWeightGraph(g);
-                    threadResults[tIndex] = PartialNodeBc(gCopy, workItems[tIndex]);
-                    handle.Set();
-                });
-
-                waitHandles[tIndex] = handle;
-                thread.Start();
+                //waitHandles[tIndex] = new ManualResetEvent(false);
+                BetweenessCalc tResult = new BetweenessCalc(g, workItems[tIndex]);
+                threadResults[tIndex] = tResult;
+                ThreadPool.QueueUserWorkItem(tResult.ThreadPoolCallback, cde);
             }
-            WaitHandle.WaitAll(waitHandles);
+            cde.Wait();
+            //WaitHandle.WaitAll(waitHandles);
 
             //Create our betweeness map and sum all of the thread results
             float[] bcMap = new float[numNodes];
             for (int t = 0; t < numThreads; t++)
+            {
+                var threadR = threadResults[t].BcMap;
                 for (int n = 0; n < numNodes; n++)
-                    bcMap[n] += threadResults[t][n];
+                    bcMap[n] += threadR[n];
+            }
 
             //divide all by 2 (undirected)
             for (int v = 0; v < numNodes; v++)
@@ -102,46 +101,53 @@ namespace NetMining.Graphs
             return bcMap;
         }
 
-        /// <summary>
-        /// Computes the node-wise betweeness contributions of the vertices supplied in nodeIndices
-        /// </summary>
-        /// <param name="g">The graph to perform betweeness calculations on</param>
-        /// <param name="nodeIndices">An array of node indexes to compute</param>
-        /// <returns></returns>
-        private static float[] PartialNodeBc(LightWeightGraph g, int[] nodeIndices)
+        internal class BetweenessCalc
         {
-            //Stopwatch sw = new Stopwatch();
-            //sw.Start();
-            int numIndices = nodeIndices.Length;
-            int numNodes = g.NumNodes;
-            float[] bcMap = new float[numNodes];
-
-            float[] delta = new float[numNodes];
-            for (int i = 0; i < numIndices; i++)
+            private readonly LightWeightGraph _g;
+            private readonly int[] _work;
+            public float[] BcMap;
+            internal BetweenessCalc(LightWeightGraph g, int[] work)
             {
-                int v = nodeIndices[i];
-                //Get a shortest path, if weighted use Dikstra, if unweighted use BFS
-                ShortestPathProvider asp = (g.IsWeighted) ? new DikstraProvider2(g, v) :
-                                                            new BFSProvider(g, v) as ShortestPathProvider;
+                _g = g;
+                _work = work;
+                BcMap = new float[g.NumNodes];
+            }
 
-                for (int j = 0; j < numNodes; j++)
-                    delta[j] = 0.0f;
+            public void ThreadPoolCallback(Object o)
+            {
+                PartialBetweenessComp();
+                ((CountdownEvent) o).Signal();
+            }
 
-                while (asp.S.Count > 0)
+            private void PartialBetweenessComp()
+            {
+                int numIndices = _work.Length;
+                int numNodes = _g.NumNodes;
+
+                float[] delta = new float[numNodes];
+                for (int i = 0; i < numIndices; i++)
                 {
-                    int w = asp.S.Pop();
-                    var wList = asp.fromList[w];
-                    foreach (int n in wList)
+                    int v = _work[i];
+                    //Get a shortest path, if weighted use Dikstra, if unweighted use BFS
+                    ShortestPathProvider asp = (_g.IsWeighted) ? new DikstraProvider2(_g, v) :
+                                                                new BFSProvider(_g, v) as ShortestPathProvider;
+
+                    for (int j = 0; j < numNodes; j++)
+                        delta[j] = 0.0f;
+
+                    while (asp.S.Count > 0)
                     {
-                        delta[n] += ((float)asp.numberOfShortestPaths[n] / (float)asp.numberOfShortestPaths[w]) * (1.0f + delta[w]);
-                        if (n != v)
-                            bcMap[n] += delta[n];
+                        int w = asp.S.Pop();
+                        var wList = asp.fromList[w];
+                        foreach (int n in wList)
+                        {
+                            delta[n] += ((float)asp.numberOfShortestPaths[n] / (float)asp.numberOfShortestPaths[w]) * (1.0f + delta[w]);
+                        }
+                        if (w != v)
+                            BcMap[w] += delta[w];
                     }
                 }
             }
-            //sw.Stop();
-            //Console.WriteLine("Partial Node BC:{0}ms size{1}", sw.ElapsedMilliseconds, nodeIndices.Length);
-            return bcMap;
         }
 
         /// <summary>
@@ -149,7 +155,7 @@ namespace NetMining.Graphs
         /// </summary>
         /// <param name="g"></param>
         /// <returns></returns>
-        public static float[] BrandesBcEdges(LightWeightGraph g)
+        public static NodeEdgeBetweeness BrandesBcEdges(LightWeightGraph g)
         {
             var edgeMap = g.GetEdgeIndexMap();
             int numNodes = g.NumNodes;
@@ -190,7 +196,15 @@ namespace NetMining.Graphs
             for (int v = 0; v < numEdges; v++)
                 bcEdge[v] /= 2f;
 
-            return bcEdge;
+            for (int v = 0; v < numNodes; v++)
+                bcNode[v] /= 2f;
+
+            return new NodeEdgeBetweeness() {EdgeBetweeness = bcEdge, NodeBetweeness = bcNode};
+        }
+
+        public struct NodeEdgeBetweeness
+        {
+            public float[] NodeBetweeness, EdgeBetweeness;
         }
     }
 }

@@ -66,7 +66,7 @@ namespace NetMining.Graphs
                 //get the index of the maximum
                 int indexMaxBetweeness = betweeness.IndexOfMax();
                 int labelOfMax = gItter.Nodes[indexMaxBetweeness].Label;
-
+                
                 //now we should add it to our list 
                 _nodeRemovalOrder.Add(labelOfMax);
                 _removedNodes[labelOfMax] = true;

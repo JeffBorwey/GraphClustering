@@ -8,44 +8,48 @@ namespace NetMining.Graphs
 {
     class BFSProvider : ShortestPathProvider
     {
-        public BFSProvider(LightWeightGraph g, int v)
+        public BFSProvider(LightWeightGraph g, int startV)
             : base(g.Nodes.Length)
         {
             int numNodes = g.Nodes.Length;
-            numberOfShortestPaths[v] = 1;
+            numberOfShortestPaths[startV] = 1;
             bool[] isVisited = new bool[numNodes];
+            int[] dist = new int[numNodes];
 
-            //we must set each node to infinite distance
             for (int i = 0; i < numNodes; i++)
             {
-                g.Nodes[i].NodeWeight = float.MaxValue;
                 fromList[i] = new List<int>(5);
             }
 
             //now we need to set our node to 0
-            g.Nodes[v].NodeWeight = 0.0f;
+            dist[startV] = 0;
 
             Queue<int> Q = new Queue<int>();
-            Q.Enqueue(v);
-            isVisited[v] = true;
+            Q.Enqueue(startV);
+            isVisited[startV] = true;
             while (Q.Count > 0)
             {
                 //Grab an item
-                int u = Q.Dequeue();
-                this.S.Push(u);
-                var nodeU = g.Nodes[u];
-                int edgeCount = nodeU.Count;
+                int v = Q.Dequeue();
+                S.Push(v);
+                var nodeV = g.Nodes[v];
+                int dV = dist[v];
+
+                int edgeCount = nodeV.Count;
                 for (int i = 0; i < edgeCount; i++)
                 {
-                    int w = nodeU.Edge[i];
+                    int w = nodeV.Edge[i];
+                    
                     if (!isVisited[w])
                     {
-                        float newWeight = nodeU.NodeWeight + 1.0f;
-                        numberOfShortestPaths[w] += numberOfShortestPaths[u];
-                        g.Nodes[w].NodeWeight = newWeight;
                         Q.Enqueue(w);
                         isVisited[w] = true;
-                        fromList[w].Add(u);
+                        dist[w] = dV + 1;
+                    }
+                    if (dist[w] == (dV + 1))
+                    {
+                        numberOfShortestPaths[w] += numberOfShortestPaths[v];
+                        fromList[w].Add(v);
                     }
                 }
             }

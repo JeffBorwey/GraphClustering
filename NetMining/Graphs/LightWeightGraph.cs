@@ -761,7 +761,6 @@ namespace NetMining.Graphs
             internal int Label;
             public int[] Edge;
             public float[] EdgeWeights; //if null do nothing
-            internal float NodeWeight;
             internal int Count;
             //holds the edge offset for this node, based upon the simple edge indexing scheme
             //Edges are indexed starting with node 0, from edge 0 to the last edge, then node 1, etc.
@@ -793,7 +792,7 @@ namespace NetMining.Graphs
                 Label = n.Label;
                 Edge = (int[]) n.Edge.Clone();
                 EdgeWeights = (float[]) n.EdgeWeights.Clone();
-                NodeWeight = n.NodeWeight;
+                //NodeWeight = n.NodeWeight;
                 Count = n.Count;
             }
 

@@ -102,7 +102,7 @@ namespace NetMining.ClusteringAlgo
         public void SavePartition(String saveLocation, String dataFile)
         {
             //Assumes .Cluster endinge
-            using (StreamWriter sw = new StreamWriter(saveLocation + ".cluster"))
+            using (StreamWriter sw = new StreamWriter(saveLocation))
             {
                 if (Data.Type == AbstractDataset.DataType.PointSet)
                     sw.WriteLine("Points {0}", dataFile);

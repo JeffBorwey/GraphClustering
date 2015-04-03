@@ -10,22 +10,18 @@ namespace NetMining.Graphs
             int numNodes = g.Nodes.Length;
             numberOfShortestPaths[v] = 1;
             fromList = new List<int>[numNodes]; //List of nodes (we will use this to 
-            
+
             //we must set each node to infinite distance
             for (int i = 0; i < numNodes; i++)
             {
-                g.Nodes[i].NodeWeight = float.MaxValue;
                 fromList[i] = new List<int>(2);
             }
-            //now we need to set our node to 0
-            g.Nodes[v].NodeWeight = 0.0f;
 
             //now we need to setup our heap
             ADT.IndexedItem[] items = new IndexedItem[numNodes];
             for(int i = 0; i < numNodes; i++)
             {
-                var n = g.Nodes[i];
-                items[i] = new IndexedItem(n.Id, n.NodeWeight);
+                items[i] = new IndexedItem(i, (i == v) ? 0.0f : float.MaxValue);
             }
             MinHeapDikstra minHeap = new MinHeapDikstra(numNodes, items[v]);
 
@@ -35,7 +31,8 @@ namespace NetMining.Graphs
                 var h = minHeap.extractMin();
 
                 int uIndex = h.NodeIndex;
-                this.S.Push(uIndex);
+                S.Push(uIndex);
+
                 //check all edges
                 var u = g.Nodes[uIndex];
                 int uEdgeCount = g.Nodes[uIndex].Count;
