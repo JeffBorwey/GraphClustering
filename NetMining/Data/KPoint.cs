@@ -94,6 +94,7 @@ namespace NetMining.Data
             ArithmeticMean,
             Max,
             MaxAttr,
+            ZeroMeanOneStd,
             None
         }
 

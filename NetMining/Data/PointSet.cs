@@ -63,6 +63,38 @@ namespace NetMining.Data
                 foreach (KPoint p in PointList)
                     p.Normalize(attributes);
             }
+            else if (norm == KPoint.NormType.ZeroMeanOneStd)
+            {
+                //Calculate the mean and std
+                double[] rowMeans = new double[Dimensions];
+                double[] rowSqrSum = new double[Dimensions];
+                double[] rowStds = new double[Dimensions];
+
+                //Calculate the mean and std
+                foreach (var point in PointList)
+                {
+                    for (int d  = 0; d < Dimensions; d++)
+                    {
+                        rowMeans[d] += point[d];
+                        rowSqrSum[d] += point[d] * point[d];
+                    }
+                }
+                for (int d = 0; d < Dimensions; d++)
+                {
+                    rowMeans[d] /= PointList.Count;
+                    double attrVar = rowSqrSum[d] / PointList.Count - rowMeans[d] * rowMeans[d];
+                    rowStds[d] = Math.Sqrt(attrVar);
+                }
+
+                //Standardize the data
+                foreach (var point in PointList)
+                {
+                    for (int d = 0; d < Dimensions; d++)
+                    {
+                        point[d] = (point[d] - rowMeans[d]) / rowStds[d];
+                    }
+                }
+            }
             else
             {
                 foreach (KPoint p in PointList)
