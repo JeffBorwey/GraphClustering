@@ -261,6 +261,10 @@ namespace NetMining.Graphs
 
             //find the maximum sized component in the attacked graph
             var components = g.GetComponents(previsitedList: sClone);
+
+            if (components.Count == 1)
+                return float.MaxValue;
+
             int cMax = components.Select(c => c.Count).Max();
 
             //calculate VAT

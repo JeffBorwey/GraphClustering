@@ -1013,24 +1013,11 @@ namespace GraphClustering
 
             //get the Partion file
             Partition clusterFile = new Partition(externalEvalClusterText.Text);
-            int countOfPoints = clusterFile.DataCount;
-            
-            //create a count mapping
-            //[actual cluster label, number in found clusters]
-            int[,] clusterMatching = new int[labels.UniqueLabels.Count, clusterFile.Clusters.Count];
-            foreach (Cluster c in clusterFile.Clusters)
-            {
-                foreach (ClusteredItem k in c.Points)
-                {
-                    int actualMatching = labels.LabelIndices[k.Id];
-                    int foundMatching = k.ClusterId;
-                    clusterMatching[actualMatching, foundMatching]++;
-                }
-            }
 
-            //One-To-One Mapping like Darla's
-            String greedyError = ExternalEval.GreedyErrorEval(clusterFile, labels, clusterMatching);
-            externalEvalResultText.Text = greedyError;
+            //Calculate the Error
+            ExternalEval error = new ExternalEval(clusterFile, labels);
+            
+            externalEvalResultText.Text = error.TextResults;
 
         }
 

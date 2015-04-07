@@ -15,7 +15,7 @@ namespace NetMining.Evaluation
         public List<GroundTruthMatch> Matches; 
         public readonly Partition P;
         public readonly LabelList L;
-
+        public String TextResults;
         public class GroundTruthMatch
         {
             public readonly int PartitionClusterId;
@@ -98,6 +98,7 @@ namespace NetMining.Evaluation
 
             sb.AppendFormat("Total Accuracy: ({0}/{1}) {2}%", sumCorrect, P.DataCount, 100.0 * (double)sumCorrect / (double)P.DataCount);
             sb.AppendLine();
+            TextResults = sb.ToString();
         }
 
         private static String OptimalErrorEval(Partition clusterFile, LabelList labels, int[,] clusterMatching)

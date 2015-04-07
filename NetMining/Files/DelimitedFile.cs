@@ -33,6 +33,10 @@ namespace NetMining.Files
             }
 
         }
+        public DelimitedFile RemoveColumns(int removeIndex)
+        {
+            return RemoveColumns(new List<int> { removeIndex });
+        }
 
         public DelimitedFile RemoveColumns(List<int> removeIndex)
         {

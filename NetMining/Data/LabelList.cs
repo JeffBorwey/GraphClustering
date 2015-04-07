@@ -10,6 +10,11 @@ namespace NetMining.Data
         public readonly int[] LabelIndices;
         public readonly List<String> UniqueLabels;
 
+        /// <summary>
+        /// Creates a LabelList
+        /// </summary>
+        /// <param name="f">File holding the label column</param>
+        /// <param name="col">0-Based index of the label column</param>
         public LabelList(DelimitedFile f, int col) : this(f.GetColumn(col))
         {
             

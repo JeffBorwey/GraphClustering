@@ -56,6 +56,7 @@
     <Compile Include="ClusteringAlgo\KMeans.cs" />
     <Compile Include="Data\AbstractDataset.cs" />
     <Compile Include="Data\DimensionalityReduction\PCA.cs" />
+    <Compile Include="Data\LabeledPointSet.cs" />
     <Compile Include="Data\LabelList.cs" />
     <Compile Include="Data\PointSet.cs" />
     <Compile Include="Data\DistanceMatrix.cs" />
