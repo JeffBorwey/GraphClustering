@@ -14,13 +14,13 @@ namespace NetMining.Graphs
         {
             int numnodes = g.NumNodes;
             float[] bcMap = new float[numnodes];
-            
+            float[] delta = new float[numnodes];
             for (int v = 0; v < numnodes; v++)
             {
                 //Get a shortest path, if weighted use Dikstra, if unweighted use BFS
                 ShortestPathProvider asp = (g.IsWeighted) ? new DikstraProvider2(g, v) : 
                                                             new BFSProvider(g,v) as ShortestPathProvider;
-                float[] delta = new float[numnodes];
+                Array.Clear(delta, 0, numnodes);
                 
                 while (asp.S.Count > 0)
                 {
@@ -40,6 +40,94 @@ namespace NetMining.Graphs
                 bcMap[v] /= 2f;
 
             return bcMap;
+        }
+
+
+        /// <summary>
+        /// Calculates Node based Betweeness Centrality using multiple threads
+        /// </summary>
+        /// <param name="g"></param>
+        /// <returns></returns>
+        public static float[] ParallelBrandesBcNodes2(LightWeightGraph g)
+        {
+            
+            int numNodes = g.NumNodes;
+            int numThreads = Settings.Threading.NumThreadsBc;
+            int numExtra = numNodes%numThreads;
+
+            float[] bcMap = new float[numNodes];
+            //Create our threads use a closure to get our return arrays
+            
+            int i = 0;
+            while (i < numNodes)
+            {
+                int numT = (numNodes - i > numExtra) ? numThreads : numExtra;
+                CountdownEvent cde = new CountdownEvent(numT);
+                BetweenessCalc2[] threadResults = new BetweenessCalc2[numT];
+                for (int t = 0; t < numT; t++)
+                {
+                    int tIndex = t;
+                    BetweenessCalc2 tResult = new BetweenessCalc2(g, i+t);
+                    threadResults[tIndex] = tResult;
+                    ThreadPool.QueueUserWorkItem(tResult.ThreadPoolCallback, cde);
+                }
+                cde.Wait();
+                for (int t = 0; t < numT; t++)
+                {
+                    var threadR = threadResults[t].delta;
+                    for (int n = 0; n < numNodes; n++)
+                        bcMap[n] += threadR[n];
+                }
+                i += numThreads;
+            }
+
+            //divide all by 2 (undirected)
+            for (int v = 0; v < numNodes; v++)
+                bcMap[v] /= 2f;
+
+            return bcMap;
+        }
+
+        internal class BetweenessCalc2
+        {
+            private readonly LightWeightGraph _g;
+            private readonly int v;
+            public float[] delta;
+            internal BetweenessCalc2(LightWeightGraph g, int work)
+            {
+                _g = g;
+                v = work;
+                delta = new float[g.NumNodes];
+            }
+
+            public void ThreadPoolCallback(Object o)
+            {
+                PartialBetweenessComp();
+                ((CountdownEvent)o).Signal();
+            }
+
+            private void PartialBetweenessComp()
+            {
+                for (int i = 0; i < delta.Length; i++)
+                    delta[i] = 0;
+
+                //Get a shortest path, if weighted use Dikstra, if unweighted use BFS
+                ShortestPathProvider asp = (_g.IsWeighted)
+                    ? new DikstraProvider2(_g, v)
+                    : new BFSProvider(_g, v) as ShortestPathProvider;
+
+                while (asp.S.Count > 0)
+                {
+                    int w = asp.S.Pop();
+                    var wList = asp.fromList[w];
+                    foreach (int n in wList)
+                    {
+                        delta[n] += ((float) asp.numberOfShortestPaths[n]/ asp.numberOfShortestPaths[w])*
+                                    (1.0f + delta[w]);
+                    }
+                }
+                delta[v] = 0;
+            }
         }
 
         /// <summary>

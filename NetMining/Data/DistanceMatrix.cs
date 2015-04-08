@@ -65,6 +65,18 @@ namespace NetMining.Data
             return distanceList;
         }
 
+        public List<double> GetSortedDistanceListD()
+        {
+            List<double> distanceList = new List<double>();
+
+            for (int i = 0; i < Count - 1; i++)
+                for (int j = i + 1; j < Count; j++)
+                    distanceList.Add(Distances[i, j]);
+
+            distanceList.Sort((x, y) => x.CompareTo(y));
+            return distanceList;
+        }
+
         public DistanceMatrixWithMap GetReducedDataSet(List<int> itemList)
         {
             int count = itemList.Count;
