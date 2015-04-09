@@ -14,7 +14,7 @@ namespace NetMining.Graphs.Generator
     /// It constructs a MST, then adds edges at random, with shorter edges more likely,
     /// in the style of Kleinberg's small-world graph
     /// </summary>
-    class RandomGraphGenerator : IPointGraphGenerator
+    public class RandomGraphGenerator : IPointGraphGenerator
     {
         private int _alpha = 3;
         private int _expP = 1;

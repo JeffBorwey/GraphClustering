@@ -13,6 +13,18 @@ namespace debugNetData
     {
         static void Main(string[] args)
         {
+
+            //Load the data
+            LabeledPointSet data = new LabeledPointSet("iris.data", LabeledPointSet.LabelLocation.LastColumn);
+            //Create a graph generator and configure it
+            NetMining.Graphs.Generator.RandomGraphGenerator randomGraphGen = new NetMining.Graphs.Generator.RandomGraphGenerator();
+            randomGraphGen.SetAlpha(3);
+            randomGraphGen.SetExpP(1);
+            //Create a graph using the generator and save it
+            var g = randomGraphGen.GenerateGraph(data.Points.GetDistanceMatrix());
+            g.SaveGML("iris_random.gml"); 
+            
+            /*
             PointSet swissPoints = new PointSet("iris.txt");
             LightWeightGraph minIris = LightWeightGraph.GetMinKnnGraph(swissPoints.GetDistanceMatrix());
             var map = minIris.GetEdgeIndexMap();
@@ -28,6 +40,7 @@ namespace debugNetData
 
                 }
             }
+            */
             //minSwiss.SaveGML("iris.gml");
             //minSwiss.SaveGraph("iris.graph");
             /*
