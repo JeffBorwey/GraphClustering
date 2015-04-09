@@ -72,6 +72,7 @@
     <Compile Include="Graphs\Generator\GeoGraphGenerator.cs" />
     <Compile Include="Graphs\Generator\IPointGraphGenerator.cs" />
     <Compile Include="Graphs\Generator\KNNGraphGenerator.cs" />
+    <Compile Include="Graphs\Generator\RandomGraphGenerator.cs" />
     <Compile Include="Graphs\LightWeightGraph.cs" />
     <Compile Include="Graphs\ShortestPathProvider.cs" />
     <Compile Include="Data\KPoint.cs" />
