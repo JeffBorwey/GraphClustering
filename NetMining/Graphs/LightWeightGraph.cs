@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.IO;
@@ -414,6 +415,83 @@ namespace NetMining.Graphs
 
         #region "Save and Load from file"
         #region "GML"
+
+        /// <summary>
+        /// Saves a Light weight graph as a GML
+        /// </summary>
+        /// <param name="filename">File to save to</param>
+        /// <param name="nodeDescriptors">A dictionary of dictionaries.  The Key is the attribute tag (eg: "label") and the value is a mapping from node index to attribute value</param>
+        /// <param name="nodeGraphicsDescriptors">A dictionary of dictionaries for graphics attributes.  The Key is the attribute tag (eg: "fill", or "x") and the value is a mapping from node index to attribute value</param>
+        public void SaveGML(String filename, Dictionary<String, Dictionary<int, String>> nodeDescriptors = null, Dictionary<String, Dictionary<int, String>> nodeGraphicsDescriptors = null)
+        {
+            using (StreamWriter sw = new StreamWriter(filename))
+            {
+                sw.WriteLine("graph [");
+
+                for (int i = 0; i < this.Nodes.Length; i++)
+                {
+                    sw.WriteLine("\tnode [");
+                    sw.WriteLine("\t\tid " + i);
+
+                    if (nodeDescriptors != null)
+                    {
+                        foreach (var kv in nodeDescriptors)
+                        {
+                            if (kv.Value.ContainsKey(i))
+                            {
+                                String tag = kv.Key;
+                                String val = kv.Value[i];
+                                sw.WriteLine("\t\t{0} {1}", tag, val);
+                            }
+                        }
+                    }
+
+                    if (nodeGraphicsDescriptors != null)
+                    {
+                        var attributes = (from kv in nodeGraphicsDescriptors 
+                                          where kv.Value.ContainsKey(i) 
+                                          select new KeyValuePair<string, string>(kv.Key, kv.Value[i])).ToList();
+
+                        if (attributes.Count == 0)
+                            break;
+
+                        sw.WriteLine("\t\tgraphics [");
+
+                        foreach (var kv in nodeGraphicsDescriptors)
+                        {
+                            if (kv.Value.ContainsKey(i))
+                            {
+                                String tag = kv.Key;
+                                String val = kv.Value[i];
+                                sw.WriteLine("\t\t\t{0} {1}", tag, val);
+                            }
+                        }
+
+                        sw.WriteLine("\t\t]");
+                    }
+                    sw.WriteLine("\t]");
+                }
+
+                for (int i = 0; i < Nodes.Length; i++)
+                {
+                    for (int j = 0; j < Nodes[i].Count; j++)
+                    {
+                        sw.WriteLine("\tedge [");
+                        sw.WriteLine("\t\tsource " + i);
+                        sw.WriteLine("\t\ttarget " + Nodes[i].Edge[j]);
+                        if (this.IsWeighted)
+                            sw.WriteLine("\t\tvalue " + Nodes[i].EdgeWeights[j]);
+                        sw.WriteLine("\t]");
+                    }
+                }
+
+                sw.WriteLine("]");
+            }
+
+        }
+
+
+        //Depreciated
         public void SaveGML(String filename, NetVertDesciption[] descriptors = null,  Dictionary<int, Color> colors = null)
         {
             using (StreamWriter sw = new StreamWriter(filename))
@@ -665,7 +743,6 @@ namespace NetMining.Graphs
         }
 
         #endregion
-
         #region ".graph"
         public static LightWeightGraph GetGraphFromFile(String file)
         {
