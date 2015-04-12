@@ -457,14 +457,11 @@ namespace NetMining.Graphs
 
                         sw.WriteLine("\t\tgraphics [");
 
-                        foreach (var kv in nodeGraphicsDescriptors)
+                        foreach (var kv in attributes)
                         {
-                            if (kv.Value.ContainsKey(i))
-                            {
-                                String tag = kv.Key;
-                                String val = kv.Value[i];
-                                sw.WriteLine("\t\t\t{0} {1}", tag, val);
-                            }
+                            String tag = kv.Key;
+                            String val = kv.Value;
+                            sw.WriteLine("\t\t\t{0} {1}", tag, val);
                         }
 
                         sw.WriteLine("\t\t]");
