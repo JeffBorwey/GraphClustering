@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.IO;
+using System.Text.RegularExpressions;
 using NetMining.ADT;
 using NetMining.Data;
 using NetMining.Files;
@@ -412,7 +414,7 @@ namespace NetMining.Graphs
 
         #region "Save and Load from file"
         #region "GML"
-        public void SaveGML(String filename)
+        public void SaveGML(String filename, NetVertDesciption[] descriptors = null,  Dictionary<int, Color> colors = null)
         {
             using (StreamWriter sw = new StreamWriter(filename))
             {
@@ -422,6 +424,28 @@ namespace NetMining.Graphs
                 {
                     sw.WriteLine("\tnode [");
                     sw.WriteLine("\t\tid " + i);
+                    if (descriptors != null)
+                        sw.WriteLine("\t\tlabel \"{0}\"", descriptors[this[i].Label].Desc);
+                    if (descriptors != null || colors != null)
+                    {
+                        sw.WriteLine("\t\tgraphics [");
+                        if (descriptors != null)
+                        {
+                            sw.WriteLine("\t\t\tx {0}", descriptors[this[i].Label].X);
+                            sw.WriteLine("\t\t\ty {0}", descriptors[this[i].Label].Y);
+                        }
+                        if (colors != null)
+                        {
+                            String colorString = "808080"; //Default color is gray
+                            if (colors.ContainsKey(i))
+                            {
+                                Color c = colors[i];
+                                colorString = c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
+                            }
+                            sw.WriteLine("\t\t\tfill #{0}", colorString);
+                        }
+                        sw.WriteLine("\t\t]");
+                    }
                     sw.WriteLine("\t]");
                 }
 
@@ -433,7 +457,7 @@ namespace NetMining.Graphs
                         sw.WriteLine("\t\tsource " + i);
                         sw.WriteLine("\t\ttarget " + Nodes[i].Edge[j]);
                         if (this.IsWeighted)
-                            sw.WriteLine("\t\tweight " + Nodes[i].EdgeWeights[j]);
+                            sw.WriteLine("\t\tvalue " + Nodes[i].EdgeWeights[j]);
                         sw.WriteLine("\t]");
                     }
                 }
@@ -512,7 +536,7 @@ namespace NetMining.Graphs
                                 {
                                     targetId = nodeIdLookup[split[j + 1]];
                                 }
-                                else if (split[j] == "weight")
+                                else if (split[j] == "weight" || split[j] == "value")
                                 {
                                     edgeWeight = float.Parse(split[j + 1]);
                                 }
@@ -556,6 +580,92 @@ namespace NetMining.Graphs
             return new LightWeightGraph(nodes.ToArray(), isWeighted);
         }
         #endregion
+        #region ".net"
+
+        public static LWGWithNodeDescriptors GetGraphFromNetFile(String file)
+        {
+            using (StreamReader sr = new StreamReader(file))
+            {
+                String vertCountPattern = "[*]Vertices\\s+(?<vert>\\d+)";
+                String firstLine = sr.ReadLine();
+                var match = Regex.Match(firstLine, vertCountPattern, RegexOptions.IgnoreCase);
+                int numVert = int.Parse(match.Groups["vert"].Value);
+
+                String vertPattern =
+                    "\\s+(?<vertid>\\d+)\\s+\"(?<vertName>[^\"]+)\"\\s+(?<x>\\d[.]\\d+)\\s+(?<y>\\d+[.]\\d+)";
+                
+                NetVertDesciption[] verts = new NetVertDesciption[numVert];
+                for (int i = 0; i < numVert; i++)
+                {
+                    String line = sr.ReadLine();
+                    match = Regex.Match(line, vertPattern, RegexOptions.IgnoreCase);
+                    String vertID = match.Groups["vertid"].Value;
+                    String vertName = match.Groups["vertName"].Value;
+                    String x = match.Groups["x"].Value;
+                    String y = match.Groups["y"].Value;
+                    verts[i] = (new NetVertDesciption(int.Parse(vertID)-1, vertName, float.Parse(x), float.Parse(y)));
+                }
+
+                while (!sr.ReadLine().Contains("*Edges"))
+                {
+                }
+
+                List<int>[] edges = new List<int>[numVert];
+                List<float>[] edgeWeights = new List<float>[numVert];
+                for (int i = 0; i < numVert; i ++)
+                {
+                    edges[i] = new List<int>();
+                    edgeWeights[i] = new List<float>();
+                }
+                String edgePattern =
+                    "\\s+(?<fIndex>\\d+)\\s+(?<tIndex>\\d+)\\s+(?<dist>\\d[.]\\d+)";
+                while (!sr.EndOfStream)
+                {
+                    String line = sr.ReadLine();
+                    match = Regex.Match(line, edgePattern, RegexOptions.IgnoreCase);
+                    int from = int.Parse(match.Groups["fIndex"].Value) - 1;
+                    int to = int.Parse(match.Groups["tIndex"].Value) - 1;
+                    float dist = float.Parse(match.Groups["dist"].Value);
+                    edges[from].Add(to); edgeWeights[from].Add(dist);
+                    edges[to].Add(from); edgeWeights[to].Add(dist);
+                }
+
+                LightWeightNode[] nodes = new LightWeightNode[numVert];
+                for (int i = 0; i < numVert; i++)
+                    nodes[i] = (new LightWeightNode(i, true, edges[i], edgeWeights[i]));
+                return new LWGWithNodeDescriptors(verts, new LightWeightGraph(nodes, true));
+            }
+        }
+
+        public class LWGWithNodeDescriptors
+        {
+            public NetVertDesciption[] Descriptors;
+            public LightWeightGraph Lwg;
+
+            public LWGWithNodeDescriptors(NetVertDesciption[] descriptors, LightWeightGraph lwg)
+            {
+                Descriptors = descriptors;
+                Lwg = lwg;
+            }
+        }
+
+        public class NetVertDesciption
+        {
+            public int Id;
+            public String Desc;
+            public float X, Y;
+
+            public NetVertDesciption(int id, string desc, float x, float y)
+            {
+                Id = id;
+                Desc = desc;
+                X = x;
+                Y = y;
+            }
+        }
+
+        #endregion
+
         #region ".graph"
         public static LightWeightGraph GetGraphFromFile(String file)
         {
@@ -758,7 +868,7 @@ namespace NetMining.Graphs
         public class LightWeightNode
         {
             internal readonly int Id;
-            internal int Label;
+            public int Label;
             public int[] Edge;
             public float[] EdgeWeights; //if null do nothing
             internal int Count;
