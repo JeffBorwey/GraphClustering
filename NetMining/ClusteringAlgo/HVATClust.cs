@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using NetMining.Data;
 using NetMining.Graphs;
+using NetMining.Graphs.Generator;
 
 namespace NetMining.ClusteringAlgo
 {
@@ -11,35 +13,32 @@ namespace NetMining.ClusteringAlgo
     {
         readonly AbstractDataset _data;
         private readonly int _minK;
-        private readonly bool _useKnn;
         private readonly bool _weighted;
         private readonly bool _reassignNodes;
         private readonly float _alpha;
         private readonly float _beta;
-        private readonly int _kNNOffset;
         private readonly bool _hillClimb;
-        private readonly DistanceMatrix _mat;
+        private readonly IPointGraphGenerator _graphGen;
 
         private StringBuilder meta;
-        public HVATClust(AbstractDataset data, int k, bool weighted = true, bool useKnn = true, int kNNOffset = 0, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
-            :this(k, weighted, useKnn, kNNOffset, alpha, beta, reassignNodes, hillClimb)
+        public HVATClust(AbstractDataset data, int k, IPointGraphGenerator graphGen, bool weighted = true, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
+            :this(k, weighted, graphGen, alpha, beta, reassignNodes, hillClimb)
         {
             _data = data;
         }
 
         public HVATClust(LightWeightGraph data, int k, bool weighted, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
-            : this(k, weighted, false, 0, alpha, beta, reassignNodes, hillClimb)
+            : this(k, weighted, null, alpha, beta, reassignNodes, hillClimb)
         {
             _data = data;
         }
 
 
-        private HVATClust(int k, bool weighted, bool useKnn, int kNNOffset = 0, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
+        private HVATClust(int k, bool weighted, IPointGraphGenerator graphGen = null, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
         {
             _minK = k;
-            _useKnn = useKnn;
             _weighted = weighted;
-            _kNNOffset = kNNOffset;
+            _graphGen = graphGen;
             _alpha = alpha;
             _beta = beta;
             _reassignNodes = reassignNodes;
@@ -51,7 +50,6 @@ namespace NetMining.ClusteringAlgo
 
         public Partition GetPartition()
         {
-            int iter = 0;
             DistanceMatrix mat = null;
             if (_data.Type == AbstractDataset.DataType.DistanceMatrix)
                 mat = (DistanceMatrix)_data;
@@ -88,13 +86,11 @@ namespace NetMining.ClusteringAlgo
                     }
                     else //Distance matrix or Pointset
                     {
+                        Debug.Assert(mat != null, "mat != null");
                         var subMatrix = mat.GetReducedDataSet(clusterSubset);
 
                         //Generate our graph
-                        if (_useKnn)
-                            lwg = LightWeightGraph.GetMinKnnGraph(subMatrix.Mat, _kNNOffset);
-                        else
-                            lwg = LightWeightGraph.GetMinGeoGraph(subMatrix.Mat);
+                        lwg = _graphGen.GenerateGraph(subMatrix.Mat);
                     }
 
                     subsetMap.Add(c.ClusterId, clusterSubset.ToArray());

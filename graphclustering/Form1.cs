@@ -14,6 +14,7 @@ using NetMining.Graphs;
 using NetMining.ClusteringAlgo;
 using NetMining.Evaluation;
 using NetMining.ExtensionMethods;
+using NetMining.Graphs.Generator;
 
 namespace GraphClustering
 {
@@ -966,9 +967,23 @@ namespace GraphClustering
 
             bool useKNN = comboBox3.SelectedIndex == 0;
 
+            IPointGraphGenerator gen;
+            if (useKNN)
+            {
+                var knnGen = new KNNGraphGenerator();
+                knnGen.SetMinimumConnectivity();
+                knnGen.SetMinOffset(knnOffset);
+                gen = knnGen;
+            }
+            else //use geometric graph
+            {
+                var rGen = new GeoGraphGenerator();
+                rGen.SetMinimumConnectivity();
+                gen = rGen;
+            }
             //Add hillClimbing
             //Add more heuristics?
-            HVATClust hVat = new HVATClust(hVatPoints, clusterCount, hvatUseWeights.Checked, useKNN, knnOffset, vatAlpha, vatBeta);
+            HVATClust hVat = new HVATClust(hVatPoints, clusterCount, gen, hvatUseWeights.Checked, vatAlpha, vatBeta);
 
 
             MessageBox.Show("Starting! Click Ok to continue");
