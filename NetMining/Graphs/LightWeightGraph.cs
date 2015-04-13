@@ -452,19 +452,19 @@ namespace NetMining.Graphs
                                           where kv.Value.ContainsKey(i) 
                                           select new KeyValuePair<string, string>(kv.Key, kv.Value[i])).ToList();
 
-                        if (attributes.Count == 0)
-                            break;
-
-                        sw.WriteLine("\t\tgraphics [");
-
-                        foreach (var kv in attributes)
+                        if (attributes.Count > 0)
                         {
-                            String tag = kv.Key;
-                            String val = kv.Value;
-                            sw.WriteLine("\t\t\t{0} {1}", tag, val);
-                        }
+                            sw.WriteLine("\t\tgraphics [");
 
-                        sw.WriteLine("\t\t]");
+                            foreach (var kv in attributes)
+                            {
+                                String tag = kv.Key;
+                                String val = kv.Value;
+                                sw.WriteLine("\t\t\t{0} {1}", tag, val);
+                            }
+
+                            sw.WriteLine("\t\t]");
+                        }
                     }
                     sw.WriteLine("\t]");
                 }
@@ -487,7 +487,7 @@ namespace NetMining.Graphs
 
         }
 
-
+        /*
         //Depreciated
         public void SaveGML(String filename, NetVertDesciption[] descriptors = null,  Dictionary<int, Color> colors = null)
         {
@@ -541,7 +541,7 @@ namespace NetMining.Graphs
             }
 
         }
-
+        */
 
 
         public static LightWeightGraph GetGraphFromGML(String file)

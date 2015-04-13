@@ -102,17 +102,20 @@ namespace NetMining.ClusteringAlgo
                     vatMap.Add(c.ClusterId, v);
                 }
 
+                meta.AppendLine("All calculated VATs:");
                 //Now find the minimum vat value
                 int minVatCluster = 0;
                 float minVatValue = float.MaxValue;
                 foreach (var c in vatMap)
                 {
+                    meta.Append(String.Format("{0} ", c.Value.MinVat));
                     if (c.Value.MinVat < minVatValue)
                     {
                         minVatCluster = c.Key;
                         minVatValue = c.Value.MinVat;
                     }
                 }
+                meta.AppendLine();
 
                 //now merge the partition into the cluster
                 var minVAT = vatMap[minVatCluster];
