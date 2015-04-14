@@ -63,7 +63,8 @@ namespace NetMining.Graphs.Generator
             }
             if (_graphType == KNNGraphType.MinimumConnectivity)
             {
-                return GetKNNGraph(d, QuadraticMinKNN(d) + _minKNNOffset);
+                int K = QuadraticMinKNN(d) + _minKNNOffset;
+                return GetKNNGraph(d, K);
             }
             throw new InvalidEnumArgumentException("Invalid _graphType");
         }
@@ -131,7 +132,7 @@ namespace NetMining.Graphs.Generator
             MinHeapPriorityQueue<Tuple<int, double>>.isGreaterThan comp = ((x, y) =>  x.Item2 > y.Item2);
 
             //Deal with _skipLast Choice
-            int lastNeighbor = (_skipLast) ? numNeighbors - 1 : numNeighbors;
+            int lastNeighbor = (_skipLast) ? numNodes - 1 : numNodes;
             //Add Edges
             for (int i = 0; i < lastNeighbor; i++)
             {

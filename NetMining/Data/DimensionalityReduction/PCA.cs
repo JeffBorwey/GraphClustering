@@ -74,6 +74,16 @@ namespace NetMining.Data.DimensionalityReduction
             }
         }
 
+        public PointSet GetPCAProjectionByVarriance(double explainedVariance)
+        {
+            for (int i = 0; i < RunningTotalArr.Length; i++)
+            {
+                if (RunningTotalArr[i] >= explainedVariance)
+                    return GetPCAProjection(i + 1);
+            }
+            return GetPCAProjection(1);
+        }
+
         public PointSet GetPCAProjection(int kVectors)
         {
             if (kVectors < 1)

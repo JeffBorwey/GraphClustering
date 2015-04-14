@@ -54,13 +54,25 @@ namespace NetMining.Evaluation
             for (int i = 0; i < partitionCount; i++)
                 ourCIsAssigned[i] = false;
 
+            KeyValuePair<int, int>[] gtBySize = new KeyValuePair<int, int>[truthCount];
+            for (int gt = 0; gt < truthCount; gt++)
+            {
+                int labelSize = 0;
+                for (int i = 0; i < partitionCount; i++)
+                    labelSize += clusterMatching[gt, i];
+                gtBySize[gt] = new KeyValuePair<int, int>(gt, labelSize);
+            }
+            //Sort descending by size
+            Array.Sort(gtBySize, (x, y) => y.Value.CompareTo(x.Value));
+
             int sumCorrect = 0;
             StringBuilder sb = new StringBuilder();
 
             //for each real cluster, assign the best of our clusters that hasn't
             //already been assigned
-            for (int realC = 0; realC < truthCount; realC++)
+            for (int gtIndex = 0; gtIndex < truthCount; gtIndex++)
             {
+                int realC = gtBySize[gtIndex].Key;
                 int assignedClust = 0;
                 for (int ourC = 0; ourC < partitionCount; ourC++)
                 {

@@ -36,7 +36,6 @@ namespace NetMining.Graphs
         //Vat computes given a graph
         public VAT(LightWeightGraph lwg, bool reassignNodes = true, float alpha = 1.0f, float beta = 0.0f)
         {
-            Stopwatch sw = new Stopwatch();
             
             //set our alpha and beta variables
             Alpha = alpha; Beta = beta;
@@ -50,6 +49,9 @@ namespace NetMining.Graphs
             g = new LightWeightGraph(lwg, _removedNodes);
             for (int i = 0; i < g.NumNodes; i++)
                 g.Nodes[i].Label = i;
+
+            if (lwg.NumNodes <= 2)
+                return;
 
             bool threaded = Settings.Threading.ThreadHVAT;
             //This is where our estimate for Vat is calculated
@@ -84,7 +86,6 @@ namespace NetMining.Graphs
                 _removedNodes[i] = false;
             for (int i = 0; i < _numNodesRemoved; i++)
                 _removedNodes[_nodeRemovalOrder[i]] = true;
-            //hillclimbing would go here
         }
 
         /// <summary>
@@ -262,7 +263,7 @@ namespace NetMining.Graphs
             //find the maximum sized component in the attacked graph
             var components = g.GetComponents(previsitedList: sClone);
 
-            if (components.Count == 1)
+            if (components.Count == 1 || components.Count == 0)
                 return float.MaxValue;
 
             int cMax = components.Select(c => c.Count).Max();
