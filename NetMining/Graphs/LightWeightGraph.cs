@@ -165,11 +165,12 @@ namespace NetMining.Graphs
             LightWeightNode[] nodes = new LightWeightNode[numNodes];
 
             List<int>[] edges = new List<int>[numNodes];
+            List<float>[] weights = new List<float>[numNodes];
             //List<float>[] edgeWeights = new List<float>[numNodes];
             for (int i = 0; i < numNodes; i++)
             {
                 edges[i] = new List<int>();
-                //edgeWeights[i] = new List<float>();
+                weights[i] = new List<float>();
             }
 
             //Add all of the distances to the Heap
@@ -201,15 +202,17 @@ namespace NetMining.Graphs
                         //Add it
                         edges[e.X].Add(e.Y);
                         edges[e.Y].Add(e.X);
+                        weights[e.X].Add(distances[e.X, e.Y]);
+                        weights[e.Y].Add(distances[e.X, e.Y]);
                         k++;
                     }
                 }
             }
 
             for (int i = 0; i < numNodes; i++)
-                nodes[i] = new LightWeightNode(i, false, edges[i]);
+                nodes[i] = new LightWeightNode(i, true, edges[i], weights[i]);
 
-            return new LightWeightGraph(nodes, false);
+            return new LightWeightGraph(nodes, true);
         }
 
 
