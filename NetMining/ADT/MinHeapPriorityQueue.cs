@@ -37,6 +37,12 @@ namespace NetMining.ADT
 
         public T peek() { return items[0]; }
 
+        public void AddItem(T item)
+        {
+            items.Add(item);
+            itemIndex.Add(item, items.Count - 1);
+        }
+
         public void addAll(IEnumerable<T> put)
         {
             items.AddRange(put);
@@ -125,6 +131,10 @@ namespace NetMining.ADT
             }
         }
 
+        public int Count
+        {
+            get { return items.Count; }
+        }
         private void swap(int a, int b)
         {
 

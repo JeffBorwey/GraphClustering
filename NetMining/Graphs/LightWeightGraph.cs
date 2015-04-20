@@ -77,11 +77,11 @@ namespace NetMining.Graphs
             }
 
             List<int>[] edgesList = new List<int>[NumNodes];
-            List<float>[] edgeWeightList = new List<float>[NumNodes];
+            List<double>[] edgeWeightList = new List<double>[NumNodes];
             for (int i = 0; i < lwg.NumNodes - sSize; i++)
             {
                 edgesList[i] = new List<int>();
-                edgeWeightList[i] = new List<float>();
+                edgeWeightList[i] = new List<double>();
             }
 
             //now we should add our edges
@@ -113,7 +113,7 @@ namespace NetMining.Graphs
         #endregion
 
         #region "Graph Generators"
-        public static bool GeoGraphIsConnected(DistanceMatrix distances, float threshold)
+        public static bool GeoGraphIsConnected(DistanceMatrix distances, double threshold)
         {
             return GetGeometricGraph(distances, threshold).isConnected();
         }
@@ -124,14 +124,14 @@ namespace NetMining.Graphs
         }
 
         //Threshold based
-        public static LightWeightGraph GetGeometricGraph(DistanceMatrix distances, float threshold)
+        public static LightWeightGraph GetGeometricGraph(DistanceMatrix distances, double threshold)
         {
             //construct the geo graph
             int numNodes = distances.Count;
             var nodes = new LightWeightNode[numNodes];
 
             List<int>[] edges = new List<int>[numNodes];
-            List<float>[] weights = new List<float>[numNodes];
+            List<double>[] weights = new List<double>[numNodes];
             for (int i = 0; i < numNodes; i++)
                 edges[i] = new List<int>();
             //Add Edges
@@ -165,12 +165,12 @@ namespace NetMining.Graphs
             LightWeightNode[] nodes = new LightWeightNode[numNodes];
 
             List<int>[] edges = new List<int>[numNodes];
-            List<float>[] weights = new List<float>[numNodes];
-            //List<float>[] edgeWeights = new List<float>[numNodes];
+            List<double>[] weights = new List<double>[numNodes];
+            //List<double>[] edgeWeights = new List<double>[numNodes];
             for (int i = 0; i < numNodes; i++)
             {
                 edges[i] = new List<int>();
-                weights[i] = new List<float>();
+                weights[i] = new List<double>();
             }
 
             //Add all of the distances to the Heap
@@ -224,11 +224,11 @@ namespace NetMining.Graphs
             var nodes = new LightWeightNode[numNodes];
 
             List<int>[] edgeLists = new List<int>[numNodes];
-            List<float>[] edgeWeights = new List<float>[numNodes];
+            List<double>[] edgeWeights = new List<double>[numNodes];
             for (int i = 0; i < numNodes; i++)
             {
                 edgeLists[i] = new List<int>();
-                edgeWeights[i] = new List<float>();
+                edgeWeights[i] = new List<double>();
             }
 
             //prevent redundant edges
@@ -276,8 +276,8 @@ namespace NetMining.Graphs
                         //Add the double edge now
                         edgeLists[i].Add(e.Item1);
                         edgeLists[e.Item1].Add(i);
-                        edgeWeights[i].Add((float)e.Item2);
-                        edgeWeights[e.Item1].Add((float)e.Item2);
+                        edgeWeights[i].Add((double)e.Item2);
+                        edgeWeights[e.Item1].Add((double)e.Item2);
                     }
                 }
             }
@@ -383,12 +383,12 @@ namespace NetMining.Graphs
 
         public static LightWeightGraph GetMinGeoGraph(DistanceMatrix distances)
         {
-            List<float> distList = distances.GetSortedDistanceList();
+            List<double> distList = distances.GetSortedDistanceList();
             int minDistanceIndex = BinSearchGeoMinConnectivity(0, distList.Count - 1, distances.Count, distances, distList);
             return GetGeometricGraph(distances, distList[minDistanceIndex]);
         }
 
-        public static int BinSearchGeoMinConnectivity(int min, int max, int pointCount, DistanceMatrix distance, List<float> distList)
+        public static int BinSearchGeoMinConnectivity(int min, int max, int pointCount, DistanceMatrix distance, List<double> distList)
         {
             int mid = (min + max) / 2;
 
@@ -555,7 +555,7 @@ namespace NetMining.Graphs
             HashSet<Tuple<int, int>> edgeHashSet = new HashSet<Tuple<int, int>>();
 
             List<List<int>> edges = new List<List<int>>();
-            List<List<float>> weights = new List<List<float>>();
+            List<List<double>> weights = new List<List<double>>();
             int numNodes = 0;
 
             using (StreamReader sr = new StreamReader(file))
@@ -592,7 +592,7 @@ namespace NetMining.Graphs
                 for (int i = 0; i < numNodes; i++)
                 {
                     edges.Add(new List<int>());
-                    weights.Add(new List<float>());
+                    weights.Add(new List<double>());
                 }
 
                 for (int i = 0; i < split.Length; i++)
@@ -601,7 +601,7 @@ namespace NetMining.Graphs
                     {
                         case "edge":
                             int sourceId = 0, targetId = 0;
-                            float edgeWeight = 1.0f;
+                            double edgeWeight = 1.0f;
                             int j = i;
 
                             while (split[j] != "]")
@@ -616,7 +616,7 @@ namespace NetMining.Graphs
                                 }
                                 else if (split[j] == "weight" || split[j] == "value")
                                 {
-                                    edgeWeight = float.Parse(split[j + 1]);
+                                    edgeWeight = double.Parse(split[j + 1]);
                                 }
                                 j++;
                             }
@@ -681,7 +681,7 @@ namespace NetMining.Graphs
                     String vertName = match.Groups["vertName"].Value;
                     String x = match.Groups["x"].Value;
                     String y = match.Groups["y"].Value;
-                    verts[i] = (new NetVertDesciption(int.Parse(vertID)-1, vertName, float.Parse(x), float.Parse(y)));
+                    verts[i] = (new NetVertDesciption(int.Parse(vertID)-1, vertName, double.Parse(x), double.Parse(y)));
                 }
 
                 while (!sr.ReadLine().Contains("*Edges"))
@@ -689,11 +689,11 @@ namespace NetMining.Graphs
                 }
 
                 List<int>[] edges = new List<int>[numVert];
-                List<float>[] edgeWeights = new List<float>[numVert];
+                List<double>[] edgeWeights = new List<double>[numVert];
                 for (int i = 0; i < numVert; i ++)
                 {
                     edges[i] = new List<int>();
-                    edgeWeights[i] = new List<float>();
+                    edgeWeights[i] = new List<double>();
                 }
                 String edgePattern =
                     "\\s+(?<fIndex>\\d+)\\s+(?<tIndex>\\d+)\\s+(?<dist>\\d[.]\\d+)";
@@ -703,7 +703,7 @@ namespace NetMining.Graphs
                     match = Regex.Match(line, edgePattern, RegexOptions.IgnoreCase);
                     int from = int.Parse(match.Groups["fIndex"].Value) - 1;
                     int to = int.Parse(match.Groups["tIndex"].Value) - 1;
-                    float dist = float.Parse(match.Groups["dist"].Value);
+                    double dist = double.Parse(match.Groups["dist"].Value);
                     edges[from].Add(to); edgeWeights[from].Add(dist);
                     edges[to].Add(from); edgeWeights[to].Add(dist);
                 }
@@ -731,9 +731,9 @@ namespace NetMining.Graphs
         {
             public int Id;
             public String Desc;
-            public float X, Y;
+            public double X, Y;
 
-            public NetVertDesciption(int id, string desc, float x, float y)
+            public NetVertDesciption(int id, string desc, double x, double y)
             {
                 Id = id;
                 Desc = desc;
@@ -775,7 +775,7 @@ namespace NetMining.Graphs
                 for (int j = 1; j < row.Length; j += edgeSize)
                 {
                     int from = int.Parse(row[j]);
-                    float weight = (isWeighted) ? float.Parse(row[j + 1]) : 1.0f;
+                    double weight = (isWeighted) ? double.Parse(row[j + 1]) : 1.0f;
                     nList.Add(new NodeWeightPair { Node = from, Weight = weight });
                 }
             }
@@ -784,11 +784,11 @@ namespace NetMining.Graphs
             var lwn = new LightWeightNode[nodes.Count];
 
             List<int>[] edges = new List<int>[nodes.Count];
-            List<float>[] edgeWeights = new List<float>[nodes.Count];
+            List<double>[] edgeWeights = new List<double>[nodes.Count];
             for (int i = 0; i < nodes.Count; i++)
             {
                 edges[i] = new List<int>();
-                edgeWeights[i] = new List<float>();
+                edgeWeights[i] = new List<double>();
             }
 
             for (int i = 0; i < lwn.Length; i++)
@@ -938,7 +938,7 @@ namespace NetMining.Graphs
         struct NodeWeightPair
         {
             public int Node;
-            public float Weight;
+            public double Weight;
         }
 
         
@@ -947,12 +947,12 @@ namespace NetMining.Graphs
             internal readonly int Id;
             public int Label;
             public int[] Edge;
-            public float[] EdgeWeights; //if null do nothing
+            public double[] EdgeWeights; //if null do nothing
             internal int Count;
             //holds the edge offset for this node, based upon the simple edge indexing scheme
             //Edges are indexed starting with node 0, from edge 0 to the last edge, then node 1, etc.
 
-            public LightWeightNode(int i, Boolean initWeight, List<int> edges, List<float> weights = null)
+            public LightWeightNode(int i, Boolean initWeight, List<int> edges, List<double> weights = null)
             {
                 Id = i;
                 Label = i;
@@ -963,7 +963,7 @@ namespace NetMining.Graphs
                         EdgeWeights = weights.ToArray();
                     else
                     {
-                        EdgeWeights = new float[Count];
+                        EdgeWeights = new double[Count];
                         for (int j = 0; j < Count; j++)
                             EdgeWeights[j] = 1.0f;
                     }
@@ -978,12 +978,12 @@ namespace NetMining.Graphs
                 Id = n.Id;
                 Label = n.Label;
                 Edge = (int[]) n.Edge.Clone();
-                EdgeWeights = (float[]) n.EdgeWeights.Clone();
+                EdgeWeights = (double[]) n.EdgeWeights.Clone();
                 //NodeWeight = n.NodeWeight;
                 Count = n.Count;
             }
 
-            public LightWeightNode(int i, int label, Boolean initWeight, List<int> edges, List<float> weights = null)
+            public LightWeightNode(int i, int label, Boolean initWeight, List<int> edges, List<double> weights = null)
             {
                 Id = i;
                 Edge = edges.ToArray();
@@ -994,7 +994,7 @@ namespace NetMining.Graphs
                         EdgeWeights = weights.ToArray();
                     else
                     {
-                        EdgeWeights = new float[Count];
+                        EdgeWeights = new double[Count];
                         for (int j = 0; j < Count; j++)
                             EdgeWeights[j] = 1.0f;
                     }

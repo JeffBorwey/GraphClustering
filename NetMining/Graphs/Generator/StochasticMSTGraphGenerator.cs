@@ -17,10 +17,12 @@ namespace NetMining.Graphs.Generator
     {
         private double _normAlpha = 0.2;
         private double _xScale = 2;
-        public void SetTypeNorm(double alpha, double xScale)
+        private double _cutoffProp = 1.0;
+        public void SetTypeNorm(double alpha, double xScale, double cutoffProportion = 1.0)
         {
             _normAlpha = alpha;
             _xScale = xScale;
+            _cutoffProp = cutoffProportion;
         }
 
 
@@ -46,11 +48,11 @@ namespace NetMining.Graphs.Generator
 
             //Create a list to hold edge values
             List<int>[] edges = new List<int>[numNodes];
-            List<float>[] weights = new List<float>[numNodes];
+            List<double>[] weights = new List<double>[numNodes];
             for (int i = 0; i < numNodes; i++)
             {
                 edges[i] = new List<int>();
-                weights[i] = new List<float>();
+                weights[i] = new List<double>();
             }
 
             double largestMSTEdge = 0.0;
@@ -65,6 +67,7 @@ namespace NetMining.Graphs.Generator
                     weights[i].Add(mstNodes[i].EdgeWeights[j]);
                 }
             }
+            largestMSTEdge *= _cutoffProp;
             // cycle through each possible edge
             // if the edge exists in the mst, continue
             // otherwise, add the edge to distances array, and add distance to the edge to the cummulative total
@@ -100,7 +103,7 @@ namespace NetMining.Graphs.Generator
                     {
                         int from = myDistances[m].fromNode;
                         int to = myDistances[m].toNode;
-                        float dist = d[from, to];
+                        double dist = d[from, to];
                         edges[from].Add(to);
                         weights[from].Add(dist);
                         edges[to].Add(from);

@@ -116,7 +116,7 @@ namespace NetMining.Graphs.Generator
 
             //Create a list to hold edge values
             List<int>[] edges = new List<int>[numNodes];
-            List<float>[] weights = new List<float>[numNodes];
+            List<double>[] weights = new List<double>[numNodes];
             for (int i = 0; i < numNodes; i++)
                 edges[i] = new List<int>();
 

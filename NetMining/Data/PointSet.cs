@@ -8,7 +8,7 @@ namespace NetMining.Data
 {
     /// <summary>
     /// This Class handles loading data from a comma or tab seperated file
-    /// that consists of floating point attributes
+    /// that consists of doubleing point attributes
     /// </summary>
     public class PointSet : AbstractDataset
     {
@@ -25,13 +25,13 @@ namespace NetMining.Data
 
         public DistanceMatrix GetDistanceMatrix(KPoint.DistType distType = KPoint.DistType.Euclidean)
         {
-            float[,] distMatrix = new float[Count,Count];
+            double[,] distMatrix = new double[Count,Count];
             for (int i = 0; i < Count-1; i++)
             {
                 for (int j = 0; j < Count; j++)
                 {
                     distMatrix[i, j] =
-                        distMatrix[j, i] = (float)PointList[i].GetDistance(PointList[j], distType);
+                        distMatrix[j, i] = (double)PointList[i].GetDistance(PointList[j], distType);
                 }
             }
             return new DistanceMatrix(distMatrix);

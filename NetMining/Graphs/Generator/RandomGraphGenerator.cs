@@ -57,6 +57,7 @@ namespace NetMining.Graphs.Generator
         public static LightWeightGraph GetRandomGraph(DistanceMatrix d, int alpha, double expP)
         {
             int numNodes = d.Count;
+  
             var nodes = new LightWeightGraph.LightWeightNode[numNodes];
             // make an array to hold all possible edges, less the edges in the mst
             oneNode[] myDistances = new oneNode[numNodes * (numNodes - 1) / 2 - (numNodes - 1)];
@@ -67,7 +68,7 @@ namespace NetMining.Graphs.Generator
             double myDistancesTotal = 0;
             //Create a list to hold edge values
             List<int>[] edges = new List<int>[numNodes];
-            List<float>[] weights = new List<float>[numNodes];
+            List<double>[] weights = new List<double>[numNodes];
             for (int i = 0; i < numNodes; i++)
                 edges[i] = new List<int>();
 
@@ -104,11 +105,11 @@ namespace NetMining.Graphs.Generator
             // how many edges do we want to add?
             int desiredNewEdges = (alpha * numNodes) - (numNodes - 1);
 
+            Random rnd = Utility.Util.Rng;
             // add edges randomly until we have added the desired number of edges
             while (desiredNewEdges > 0)
             {
                 // generate a random number between 0 and myDistancesTotal
-                Random rnd = new Random();
                 double rand = rnd.NextDouble() * myDistancesTotal;
 
                 // walk through the array until you find the random number

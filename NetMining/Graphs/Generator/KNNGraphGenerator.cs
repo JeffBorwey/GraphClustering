@@ -22,6 +22,7 @@ namespace NetMining.Graphs.Generator
         private int _k = 1;
         private int _minKNNOffset = 0;
         private bool _skipLast = false;
+        private int _numSkip = 0;
 
         /// <summary>
         /// Sets the number of neighbors for a created graph
@@ -53,6 +54,11 @@ namespace NetMining.Graphs.Generator
             _skipLast = skip;
         }
 
+        public void SetCountSkip(int count)
+        {
+            _numSkip = count;
+        }
+
         public LightWeightGraph GenerateGraph(DistanceMatrix d)
         {
             if (_graphType == KNNGraphType.SpecifiedK)
@@ -63,7 +69,35 @@ namespace NetMining.Graphs.Generator
             }
             if (_graphType == KNNGraphType.MinimumConnectivity)
             {
-                int K = QuadraticMinKNN(d) + _minKNNOffset;
+                int K = 1;
+                if (_numSkip == 0)
+                    K = QuadraticMinKNN(d) + _minKNNOffset;
+                else{
+                    Dictionary<int, int> kCount = new Dictionary<int,int>();
+                    for (int i = 0; i < 10; i++)
+                    {
+                        int kRun = QuadraticMinKNN(d) + _minKNNOffset;
+                        if (kCount.ContainsKey(kRun))
+                            kCount[kRun]++;
+                        else
+                            kCount.Add(kRun, 1);
+                    }
+
+                    int max = 0;
+                    int maxIndex = 0;
+                    foreach (var kv in kCount)
+                    {
+                        Console.Write("{0}:{1},", kv.Key, kv.Value);
+                        if (kv.Value > max)
+                        {
+                            maxIndex = kv.Key;
+                            max = kv.Value;
+                        }
+                    }
+                    Console.WriteLine();
+                    K = maxIndex;
+                }
+                Console.WriteLine("Selected K:{0}", K);
                 return GetKNNGraph(d, K);
             }
             throw new InvalidEnumArgumentException("Invalid _graphType");
@@ -75,6 +109,20 @@ namespace NetMining.Graphs.Generator
             int max = distance.Count - 1;
             int highestDisconnected = min;
             int lowestConnected = max;
+            int numNodes = distance.Count;
+
+            bool[] exclusion = new bool[numNodes];
+
+            int countExcluded = 0;
+            while (countExcluded < _numSkip)
+            {
+                int index = Utility.Util.Rng.Next(0, numNodes);
+                if (!exclusion[index])
+                {
+                    exclusion[index] = true;
+                    countExcluded++;
+                }
+            }
 
             //This dictionary is used to store results so recalculations are not needed
             Dictionary<int, bool> connectedDict = new Dictionary<int, bool>();
@@ -91,7 +139,7 @@ namespace NetMining.Graphs.Generator
                 if (connectedDict.ContainsKey(i))
                     continue;
 
-                bool isConn = GetKNNGraph(distance, i).isConnected();
+                bool isConn = GetKNNGraph(distance, i, exclusion).isConnected();
                 connectedDict.Add(i, isConn);
 
                 if (isConn && i < lowestConnected)
@@ -112,18 +160,18 @@ namespace NetMining.Graphs.Generator
             return lowestConnected;
         }
 
-        public LightWeightGraph GetKNNGraph(DistanceMatrix distances, int numNeighbors)
+        public LightWeightGraph GetKNNGraph(DistanceMatrix distances, int numNeighbors, bool[] exclusion = null)
         {
-
             int numNodes = distances.Count;
+            
             var nodes = new LightWeightGraph.LightWeightNode[numNodes];
 
             List<int>[] edgeLists = new List<int>[numNodes];
-            List<float>[] edgeWeights = new List<float>[numNodes];
+            List<double>[] edgeWeights = new List<double>[numNodes];
             for (int i = 0; i < numNodes; i++)
             {
                 edgeLists[i] = new List<int>();
-                edgeWeights[i] = new List<float>();
+                edgeWeights[i] = new List<double>();
             }
 
             //prevent redundant edges
@@ -136,6 +184,8 @@ namespace NetMining.Graphs.Generator
             //Add Edges
             for (int i = 0; i < lastNeighbor; i++)
             {
+                if (exclusion != null && exclusion[i])
+                    continue;
                 //get list of edges
                 List<Tuple<int, double>> edges = new List<Tuple<int, double>>();
                 for (int j = 0; j < numNodes; j++)
@@ -172,8 +222,8 @@ namespace NetMining.Graphs.Generator
                         //Add the double edge now
                         edgeLists[i].Add(e.Item1);
                         edgeLists[e.Item1].Add(i);
-                        edgeWeights[i].Add((float)e.Item2);
-                        edgeWeights[e.Item1].Add((float)e.Item2);
+                        edgeWeights[i].Add((double)e.Item2);
+                        edgeWeights[e.Item1].Add((double)e.Item2);
                     }
                 }
             }

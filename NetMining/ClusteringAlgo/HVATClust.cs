@@ -15,26 +15,26 @@ namespace NetMining.ClusteringAlgo
         private readonly int _minK;
         private readonly bool _weighted;
         private readonly bool _reassignNodes;
-        private readonly float _alpha;
-        private readonly float _beta;
+        private readonly double _alpha;
+        private readonly double _beta;
         private readonly bool _hillClimb;
         private readonly IPointGraphGenerator _graphGen;
 
         private StringBuilder meta;
-        public HVATClust(AbstractDataset data, int k, IPointGraphGenerator graphGen, bool weighted = true, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
+        public HVATClust(AbstractDataset data, int k, IPointGraphGenerator graphGen, bool weighted = true, double alpha = 1.0f, double beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
             :this(k, weighted, graphGen, alpha, beta, reassignNodes, hillClimb)
         {
             _data = data;
         }
 
-        public HVATClust(LightWeightGraph data, int k, bool weighted, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
+        public HVATClust(LightWeightGraph data, int k, bool weighted, double alpha = 1.0f, double beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
             : this(k, weighted, null, alpha, beta, reassignNodes, hillClimb)
         {
             _data = data;
         }
 
 
-        private HVATClust(int k, bool weighted, IPointGraphGenerator graphGen = null, float alpha = 1.0f, float beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
+        private HVATClust(int k, bool weighted, IPointGraphGenerator graphGen = null, double alpha = 1.0f, double beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
         {
             _minK = k;
             _weighted = weighted;
@@ -105,7 +105,7 @@ namespace NetMining.ClusteringAlgo
                 meta.AppendLine("All calculated VATs:");
                 //Now find the minimum vat value
                 int minVatCluster = 0;
-                float minVatValue = float.MaxValue;
+                double minVatValue = double.MaxValue;
                 foreach (var c in vatMap)
                 {
                     meta.Append(String.Format("{0} ", c.Value.MinVat));

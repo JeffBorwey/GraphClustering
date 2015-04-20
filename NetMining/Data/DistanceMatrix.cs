@@ -7,9 +7,9 @@ namespace NetMining.Data
 {
     public class DistanceMatrix : AbstractDataset
     {
-        public float[,] Distances;
+        public double[,] Distances;
 
-        public float this[int a, int b]
+        public double this[int a, int b]
         {
             get { return Distances[a, b]; }
             set { Distances[a, b] = value; }
@@ -27,7 +27,7 @@ namespace NetMining.Data
         /// Creates a distance matrix from an array
         /// </summary>
         /// <param name="mat"></param>
-        public DistanceMatrix(float[,] mat) : base(DataType.DistanceMatrix)
+        public DistanceMatrix(double[,] mat) : base(DataType.DistanceMatrix)
         {
             Distances = mat;
         }
@@ -47,15 +47,15 @@ namespace NetMining.Data
             if (numCols != dimensions)
                 throw new InvalidDataException("Non-Square Matrix");
 
-            Distances = new float[dimensions,dimensions];
+            Distances = new double[dimensions,dimensions];
             for (int r = 0; r < dimensions; r++)
                 for (int c = 0; c < dimensions; c++)
-                    Distances[r, c] = float.Parse(parsedFile.Data[r][c]);
+                    Distances[r, c] = double.Parse(parsedFile.Data[r][c]);
         }
 
-        public List<float> GetSortedDistanceList()
+        public List<double> GetSortedDistanceList()
         {
-            List<float> distanceList = new List<float>();
+            List<double> distanceList = new List<double>();
 
             for (int i = 0; i < Count - 1; i++)
                 for (int j = i + 1; j < Count; j++)
@@ -80,7 +80,7 @@ namespace NetMining.Data
         public DistanceMatrixWithMap GetReducedDataSet(List<int> itemList)
         {
             int count = itemList.Count;
-            float[,] data = new float[count, count];
+            double[,] data = new double[count, count];
 
             for (int i = 0; i < count; i++)
                 for (int j = 0; j < count; j++)

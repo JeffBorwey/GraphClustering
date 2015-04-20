@@ -26,7 +26,7 @@ namespace NetMining.ExtensionMethods
             }
         }
 
-        public static int IndexOfMin(this float[] self)
+        public static int IndexOfMin(this double[] self)
         {
             if (self == null)
             {
@@ -38,7 +38,7 @@ namespace NetMining.ExtensionMethods
                 throw new ArgumentException("List is empty.", "self");
             }
 
-            float min = self[0];
+            double min = self[0];
             int minIndex = 0;
 
             for (int i = 1; i < self.Length; ++i)
@@ -53,7 +53,7 @@ namespace NetMining.ExtensionMethods
             return minIndex;
         }
 
-        public static int IndexOfMax(this float[] self)
+        public static int IndexOfMax(this double[] self)
         {
             if (self == null)
             {
@@ -65,7 +65,7 @@ namespace NetMining.ExtensionMethods
                 throw new ArgumentException("List is empty.", "self");
             }
 
-            float min = self[0];
+            double min = self[0];
             int maxIndex = 0;
 
             for (int i = 1; i < self.Length; ++i)

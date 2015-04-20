@@ -14,8 +14,8 @@ namespace NetMining.Graphs
         private bool _performedHillClimb = false;
         private int _numNodesRemoved;
 
-        private float _minVat = float.MaxValue;//This will hold the best score so far
-        public readonly float Alpha, Beta;
+        private double _minVat = double.MaxValue;//This will hold the best score so far
+        public readonly double Alpha, Beta;
 
         public List<int> NodeRemovalOrder
         {
@@ -27,14 +27,14 @@ namespace NetMining.Graphs
             get { return _numNodesRemoved;}
         }
 
-        public float MinVat
+        public double MinVat
         {
             get { return _minVat; }
         }
 
         private readonly bool _reassignNodes;
         //Vat computes given a graph
-        public VAT(LightWeightGraph lwg, bool reassignNodes = true, float alpha = 1.0f, float beta = 0.0f)
+        public VAT(LightWeightGraph lwg, bool reassignNodes = true, double alpha = 1.0f, double beta = 0.0f)
         {
             
             //set our alpha and beta variables
@@ -61,7 +61,7 @@ namespace NetMining.Graphs
                 LightWeightGraph gItter = new LightWeightGraph(g, _removedNodes);
                 //sw.Restart();
                 //get the betweeness
-                float[] betweeness = (threaded) ? BetweenessCentrality.ParallelBrandesBcNodes(gItter) :
+                double[] betweeness = (threaded) ? BetweenessCentrality.ParallelBrandesBcNodes(gItter) :
                     BetweenessCentrality.BrandesBcNodes(gItter);
                 //sw.Stop();
                 //Console.WriteLine("{0} {1}ms", n+1, sw.ElapsedMilliseconds);
@@ -73,7 +73,7 @@ namespace NetMining.Graphs
                 _nodeRemovalOrder.Add(labelOfMax);
                 _removedNodes[labelOfMax] = true;
                 //calculate vat and update the record
-                float vat = CalculateVAT(_removedNodes);
+                double vat = CalculateVAT(_removedNodes);
                 if (vat < _minVat)
                 {
                     _minVat = vat;
@@ -97,14 +97,14 @@ namespace NetMining.Graphs
             if (_performedHillClimb)
                 return;
             int i = 0;
-            float bestVAT = _minVat;
+            double bestVAT = _minVat;
             bool[] s = (bool[]) _removedNodes.Clone();
 
             while (i < g.NumNodes)
             {
                 //flip a bit and calculate
                 s[i] ^= true;
-                float vat = CalculateVAT(s);
+                double vat = CalculateVAT(s);
                 if (vat < bestVAT)
                 {
                     bestVAT = vat;
@@ -139,12 +139,12 @@ namespace NetMining.Graphs
                 
             //get the connectivity structure
             List<int>[] edges = new List<int>[g.NumNodes];
-            List<float>[] edgeWeights = new List<float>[g.NumNodes];
+            List<double>[] edgeWeights = new List<double>[g.NumNodes];
 
             for (int i = 0; i < g.NumNodes; i++)
             {
                 List<int> edgeList = new List<int>();
-                List<float> weightList = new List<float>();
+                List<double> weightList = new List<double>();
                 edges[i] = edgeList;
                 edgeWeights[i] = weightList;
             }
@@ -251,20 +251,20 @@ namespace NetMining.Graphs
         }
 
         //Use GetComponents
-        private float CalculateVAT(bool[] s)
+        private double CalculateVAT(bool[] s)
         {
             //We must get the size of S
             bool[] sClone = (bool[]) s.Clone();
             int sizeS = s.Count(c => c);
 
             if (sizeS == 0)
-                return float.MaxValue;
+                return double.MaxValue;
 
             //find the maximum sized component in the attacked graph
             var components = g.GetComponents(previsitedList: sClone);
 
             if (components.Count == 1 || components.Count == 0)
-                return float.MaxValue;
+                return double.MaxValue;
 
             int cMax = components.Select(c => c.Count).Max();
 

@@ -24,7 +24,7 @@ namespace GraphClustering
         public string pointSetFile;
         public string pointSetFileShort;
         PointSet points;
-        List<float> distances = null;
+        List<double> distances = null;
         int minConnectIndex = 0;
         string graphPrefix;
         DistanceMatrix distMatrix;
@@ -230,7 +230,7 @@ namespace GraphClustering
 
             label1.Text = String.Format("Minimum Connectivity:({0} Neighbors)", minConnectIndex);
 
-            float sum = distances.Cast<float>().Sum();
+            double sum = distances.Cast<double>().Sum();
             sum /= distances.Count;
             label4.Text = "Mean Dist:" + sum;
 
@@ -264,8 +264,8 @@ namespace GraphClustering
 
             label1.Text = String.Format("Minimum Connectivity:({0})={1}", minConnectIndex, distances[minConnectIndex]);
 
-            float sum = 0;
-            foreach (float dist in distances)
+            double sum = 0;
+            foreach (double dist in distances)
                 sum += dist;
             sum /= distances.Count;
             label4.Text = "Mean Dist:" + sum;
@@ -787,7 +787,7 @@ namespace GraphClustering
 
                 label25.Text = String.Format("Minimum Connectivity:({0})={1}", minConnectIndex, distances[minConnectIndex]);
 
-                float sum = distances.Sum();
+                double sum = distances.Sum();
                 sum /= distances.Count;
                 label22.Text = "Mean Dist:" + sum;
 
@@ -962,8 +962,8 @@ namespace GraphClustering
             String pointFileName = textBox7.Text;
             PointSet hVatPoints = new PointSet(pointFileName);
 
-            float vatAlpha = (float) hVATAlphaUpDown.Value;
-            float vatBeta = (float)hVATBetaUpDown.Value;
+            double vatAlpha = (double) hVATAlphaUpDown.Value;
+            double vatBeta = (double)hVATBetaUpDown.Value;
 
             bool useKNN = comboBox3.SelectedIndex == 0;
 

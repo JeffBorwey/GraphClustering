@@ -10,11 +10,11 @@ namespace NetMining.Graphs
     static public class BetweenessCentrality
     {
 
-        public static float[] BrandesBcNodes(LightWeightGraph g)
+        public static double[] BrandesBcNodes(LightWeightGraph g)
         {
             int numnodes = g.NumNodes;
-            float[] bcMap = new float[numnodes];
-            float[] delta = new float[numnodes];
+            double[] bcMap = new double[numnodes];
+            double[] delta = new double[numnodes];
             for (int v = 0; v < numnodes; v++)
             {
                 //Get a shortest path, if weighted use Dikstra, if unweighted use BFS
@@ -28,7 +28,7 @@ namespace NetMining.Graphs
                     var wList = asp.fromList[w];
                     foreach (int n in wList)
                     {
-                        delta[n] += ((float)asp.numberOfShortestPaths[n] / (float)asp.numberOfShortestPaths[w]) * (1.0f + delta[w]);
+                        delta[n] += ((double)asp.numberOfShortestPaths[n] / (double)asp.numberOfShortestPaths[w]) * (1.0f + delta[w]);
                     }
                     if (w != v)
                         bcMap[w] += delta[w];
@@ -48,14 +48,14 @@ namespace NetMining.Graphs
         /// </summary>
         /// <param name="g"></param>
         /// <returns></returns>
-        public static float[] ParallelBrandesBcNodes2(LightWeightGraph g)
+        public static double[] ParallelBrandesBcNodes2(LightWeightGraph g)
         {
             
             int numNodes = g.NumNodes;
             int numThreads = Settings.Threading.NumThreadsBc;
             int numExtra = numNodes%numThreads;
 
-            float[] bcMap = new float[numNodes];
+            double[] bcMap = new double[numNodes];
             //Create our threads use a closure to get our return arrays
             
             int i = 0;
@@ -92,12 +92,12 @@ namespace NetMining.Graphs
         {
             private readonly LightWeightGraph _g;
             private readonly int v;
-            public float[] delta;
+            public double[] delta;
             internal BetweenessCalc2(LightWeightGraph g, int work)
             {
                 _g = g;
                 v = work;
-                delta = new float[g.NumNodes];
+                delta = new double[g.NumNodes];
             }
 
             public void ThreadPoolCallback(Object o)
@@ -122,7 +122,7 @@ namespace NetMining.Graphs
                     var wList = asp.fromList[w];
                     foreach (int n in wList)
                     {
-                        delta[n] += ((float) asp.numberOfShortestPaths[n]/ asp.numberOfShortestPaths[w])*
+                        delta[n] += ((double) asp.numberOfShortestPaths[n]/ asp.numberOfShortestPaths[w])*
                                     (1.0f + delta[w]);
                     }
                 }
@@ -135,7 +135,7 @@ namespace NetMining.Graphs
         /// </summary>
         /// <param name="g"></param>
         /// <returns></returns>
-        public static float[] ParallelBrandesBcNodes(LightWeightGraph g)
+        public static double[] ParallelBrandesBcNodes(LightWeightGraph g)
         {
             int numNodes = g.NumNodes;
             int numThreads = Settings.Threading.NumThreadsBc;
@@ -174,7 +174,7 @@ namespace NetMining.Graphs
             //WaitHandle.WaitAll(waitHandles);
 
             //Create our betweeness map and sum all of the thread results
-            float[] bcMap = new float[numNodes];
+            double[] bcMap = new double[numNodes];
             for (int t = 0; t < numThreads; t++)
             {
                 var threadR = threadResults[t].BcMap;
@@ -193,12 +193,12 @@ namespace NetMining.Graphs
         {
             private readonly LightWeightGraph _g;
             private readonly int[] _work;
-            public float[] BcMap;
+            public double[] BcMap;
             internal BetweenessCalc(LightWeightGraph g, int[] work)
             {
                 _g = g;
                 _work = work;
-                BcMap = new float[g.NumNodes];
+                BcMap = new double[g.NumNodes];
             }
 
             public void ThreadPoolCallback(Object o)
@@ -212,7 +212,7 @@ namespace NetMining.Graphs
                 int numIndices = _work.Length;
                 int numNodes = _g.NumNodes;
 
-                float[] delta = new float[numNodes];
+                double[] delta = new double[numNodes];
                 for (int i = 0; i < numIndices; i++)
                 {
                     int v = _work[i];
@@ -229,7 +229,7 @@ namespace NetMining.Graphs
                         var wList = asp.fromList[w];
                         foreach (int n in wList)
                         {
-                            delta[n] += ((float)asp.numberOfShortestPaths[n] / (float)asp.numberOfShortestPaths[w]) * (1.0f + delta[w]);
+                            delta[n] += ((double)asp.numberOfShortestPaths[n] / (double)asp.numberOfShortestPaths[w]) * (1.0f + delta[w]);
                         }
                         if (w != v)
                             BcMap[w] += delta[w];
@@ -248,8 +248,8 @@ namespace NetMining.Graphs
             var edgeMap = g.GetEdgeIndexMap();
             int numNodes = g.NumNodes;
             int numEdges = edgeMap.Count;
-            float[] bcEdge = new float[numEdges];
-            float[] bcNode = new float[numNodes];
+            double[] bcEdge = new double[numEdges];
+            double[] bcNode = new double[numNodes];
             for (int v = 0; v < numNodes; v++)
             {
                 //Get a shortest path, if weighted use Dikstra, if unweighted use BFS
@@ -257,11 +257,11 @@ namespace NetMining.Graphs
                                                             new BFSProvider(g, v) as ShortestPathProvider;
 
                 //numberOfShortestPaths = sigma
-                float[] deltaNode= new float[numNodes];
+                double[] deltaNode= new double[numNodes];
                 while (asp.S.Count > 0)
                 {
                     int w = asp.S.Pop();
-                    float coeff = (1.0f + deltaNode[w]) / (float)asp.numberOfShortestPaths[w];
+                    double coeff = (1.0f + deltaNode[w]) / (double)asp.numberOfShortestPaths[w];
                     foreach (int n in  asp.fromList[w])
                     {
                         //make sure the first index is the smallest, this is an undirected graph
@@ -270,7 +270,7 @@ namespace NetMining.Graphs
                             : new KeyValuePair<int, int>(n, w);
 
                         int edgeIndex = edgeMap[edgeNodePair];
-                        float contribution = asp.numberOfShortestPaths[n] * coeff;
+                        double contribution = asp.numberOfShortestPaths[n] * coeff;
                         bcEdge[edgeIndex] += contribution;
                         deltaNode[n] += contribution;
                     }
@@ -292,7 +292,7 @@ namespace NetMining.Graphs
 
         public struct NodeEdgeBetweeness
         {
-            public float[] NodeBetweeness, EdgeBetweeness;
+            public double[] NodeBetweeness, EdgeBetweeness;
         }
     }
 }

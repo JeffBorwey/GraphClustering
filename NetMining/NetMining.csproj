@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ADT\BallTree.cs" />
     <Compile Include="ADT\DisjointSet.cs" />
     <Compile Include="ADT\IndexedItem.cs" />
     <Compile Include="ADT\MinHeapDikstra.cs" />

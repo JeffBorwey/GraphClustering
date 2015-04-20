@@ -22,7 +22,7 @@ namespace NetMining.Graphs
             ADT.IndexedItem[] items = new IndexedItem[numNodes];
             for(int i = 0; i < numNodes; i++)
             {
-                items[i] = new IndexedItem(i, float.MaxValue);
+                items[i] = new IndexedItem(i, double.MaxValue);
             }
             items[v].NodeWeight = 0;
             MinHeapDikstra minHeap = new MinHeapDikstra(numNodes, items[v]);
@@ -40,10 +40,10 @@ namespace NetMining.Graphs
                 int uEdgeCount = g.Nodes[uIndex].Count;
                 for (int i = 0; i < uEdgeCount; i++)
                 {
-                    float newWeight = h.NodeWeight + u.EdgeWeights[i];
+                    double newWeight = h.NodeWeight + u.EdgeWeights[i];
                     int toIndex = u.Edge[i];
                     var to = items[toIndex];
-                    float toNodeWeight = to.NodeWeight;
+                    double toNodeWeight = to.NodeWeight;
                     if (newWeight < toNodeWeight)
                     {
                         to.NodeWeight = newWeight;
