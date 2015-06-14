@@ -1107,5 +1107,10 @@ namespace GraphClustering
                 SOMLabelTextbox.Text = openFileDialog1.FileName;
             }
         }
+
+        private void tabPage10_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

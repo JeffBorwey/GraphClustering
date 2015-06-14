@@ -16,6 +16,7 @@ namespace NetMining.Evaluation
         public readonly Partition P;
         public readonly LabelList L;
         public String TextResults;
+        public String ShorterTextResults;
         public class GroundTruthMatch
         {
             public readonly int PartitionClusterId;
@@ -67,11 +68,14 @@ namespace NetMining.Evaluation
 
             int sumCorrect = 0;
             StringBuilder sb = new StringBuilder();
-
+            StringBuilder ssb = new StringBuilder();
+int totalC = 0;
             //for each real cluster, assign the best of our clusters that hasn't
             //already been assigned
             for (int gtIndex = 0; gtIndex < truthCount; gtIndex++)
             {
+
+                
                 int realC = gtBySize[gtIndex].Key;
                 int assignedClust = 0;
                 for (int ourC = 0; ourC < partitionCount; ourC++)
@@ -99,6 +103,7 @@ namespace NetMining.Evaluation
                     sb.AppendFormat("Cluster {0} Assigned to Label {1} Accuracy: ({2}/{3}) {4}%",
                         assignedClust, L.UniqueLabels[realC], assigned[realC], sumRealC, 100.0 * (double)assigned[realC] / (double)sumRealC);
                     Matches.Add(new GroundTruthMatch(assignedClust, realC, assigned[realC], sumRealC, (double)assigned[realC] / sumRealC, L.UniqueLabels[realC]));
+                    totalC += sumRealC;
                 }
 
                 sb.AppendLine();
@@ -109,8 +114,12 @@ namespace NetMining.Evaluation
             TotalAccuracy = (double) sumCorrect/ P.DataCount;
 
             sb.AppendFormat("Total Accuracy: ({0}/{1}) {2}%", sumCorrect, P.DataCount, 100.0 * (double)sumCorrect / (double)P.DataCount);
+            ssb.AppendFormat("({0}/{1}), {2}%", sumCorrect, P.DataCount, 100.0 * (double)sumCorrect / (double)P.DataCount);
+            sb.Append(Environment.NewLine);
+            sb.AppendFormat("Rev Accuracy:   ({0}/{1}) {2}%", sumCorrect, totalC, 100.0 * (double)sumCorrect / (double)totalC);
             sb.AppendLine();
             TextResults = sb.ToString();
+            ShorterTextResults = ssb.ToString();
         }
 
         private static String OptimalErrorEval(Partition clusterFile, LabelList labels, int[,] clusterMatching)
