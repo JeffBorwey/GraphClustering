@@ -88,6 +88,62 @@ namespace NetMining.Graphs
                 _removedNodes[_nodeRemovalOrder[i]] = true;
         }
 
+        public VAT(LightWeightGraph lwg, bool reassignNodes = true, double alpha = 1.0f, double beta = 0.0f, List<int> nodeRemovalOrder = null, int numNodesRemoved=0)
+        {
+
+            //set our alpha and beta variables
+            Alpha = alpha; Beta = beta;
+
+            //first we set our variables up
+            _removedNodes = new bool[lwg.NumNodes];
+            _nodeRemovalOrder = nodeRemovalOrder;
+            _numNodesRemoved = numNodesRemoved;
+            _reassignNodes = reassignNodes;
+
+            //We will make a copy of the graph and set the label equal to the index
+            g = new LightWeightGraph(lwg, _removedNodes);
+            for (int i = 0; i < g.NumNodes; i++)
+                g.Nodes[i].Label = i;
+
+            if (lwg.NumNodes <= 2)
+                return;
+
+            //bool threaded = Settings.Threading.ThreadHVAT;
+            //This is where our estimate for Vat is calculated
+            for (int n = 0; n < g.NumNodes / 2; n++)  // this was 32, I think a typo?
+            {
+                //get the graph
+                LightWeightGraph gItter = new LightWeightGraph(g, _removedNodes);
+                //sw.Restart();
+                //get the betweeness
+                //double[] betweeness = (threaded) ? BetweenessCentrality.ParallelBrandesBcNodes(gItter) :
+                //    BetweenessCentrality.BrandesBcNodes(gItter);
+                //sw.Stop();
+                //Console.WriteLine("{0} {1}ms", n+1, sw.ElapsedMilliseconds);
+                //get the index of the maximum
+                //int indexMaxBetweeness = betweeness.IndexOfMax();
+                //int labelOfMax = gItter.Nodes[indexMaxBetweeness].Label;
+
+                //now we should add it to our list 
+                int labelOfMax = _nodeRemovalOrder[n];
+                //_nodeRemovalOrder.Add(labelOfMax);
+                _removedNodes[labelOfMax] = true;
+                //calculate vat and update the record
+                double vat = CalculateVAT(_removedNodes);
+                if (vat < _minVat)
+                {
+                    _minVat = vat;
+                    _numNodesRemoved = n + 1;
+                }
+            }
+
+            //Now we need to set up S to reflect the actual minimum
+            for (int i = 0; i < _removedNodes.Length; i++)
+                _removedNodes[i] = false;
+            for (int i = 0; i < _numNodesRemoved; i++)
+                _removedNodes[_nodeRemovalOrder[i]] = true;
+        }
+
         /// <summary>
         /// Perform 1-d HillClimb to locally optimize VAT.  This will change NodeRemovalOrder to hold only the nodes
         /// contained in the new optimal calculation

@@ -17,6 +17,7 @@ namespace NetMining.Evaluation
         public readonly LabelList L;
         public String TextResults;
         public String ShorterTextResults;
+        public String NoNoiseTextResults;
         public class GroundTruthMatch
         {
             public readonly int PartitionClusterId;
@@ -67,9 +68,12 @@ namespace NetMining.Evaluation
             Array.Sort(gtBySize, (x, y) => y.Value.CompareTo(x.Value));
 
             int sumCorrect = 0;
+            int noNoiseSumCorrect = 0;
             StringBuilder sb = new StringBuilder();
             StringBuilder ssb = new StringBuilder();
+            StringBuilder nonoisesb = new StringBuilder();
 int totalC = 0;
+int noNoiseC = 0;
             //for each real cluster, assign the best of our clusters that hasn't
             //already been assigned
             for (int gtIndex = 0; gtIndex < truthCount; gtIndex++)
@@ -103,23 +107,41 @@ int totalC = 0;
                     sb.AppendFormat("Cluster {0} Assigned to Label {1} Accuracy: ({2}/{3}) {4}%",
                         assignedClust, L.UniqueLabels[realC], assigned[realC], sumRealC, 100.0 * (double)assigned[realC] / (double)sumRealC);
                     Matches.Add(new GroundTruthMatch(assignedClust, realC, assigned[realC], sumRealC, (double)assigned[realC] / sumRealC, L.UniqueLabels[realC]));
+                    if (!L.UniqueLabels[realC].Equals("NA"))
+                    {
+                        //noNoiseC += sumRealC;
+                    }
                     totalC += sumRealC;
                 }
 
                 sb.AppendLine();
                 sumCorrect += assigned[realC];
+                if (!L.UniqueLabels[realC].Equals("NA")) 
+                {
+                    noNoiseSumCorrect += assigned[realC];
+                }
+                
             }
             TotalMatched = sumCorrect;
             TotalSize = P.DataCount;
             TotalAccuracy = (double) sumCorrect/ P.DataCount;
 
-            sb.AppendFormat("Total Accuracy: ({0}/{1}) {2}%", sumCorrect, P.DataCount, 100.0 * (double)sumCorrect / (double)P.DataCount);
+            for (int q = 0; q < gtBySize.Length-1; q++ )
+            {
+                noNoiseC += gtBySize[q].Value;
+            }
+
+                sb.AppendFormat("Total Accuracy: ({0}/{1}) {2}%", sumCorrect, P.DataCount, 100.0 * (double)sumCorrect / (double)P.DataCount);
             ssb.AppendFormat("({0}/{1}), {2}%", sumCorrect, P.DataCount, 100.0 * (double)sumCorrect / (double)P.DataCount);
             sb.Append(Environment.NewLine);
             sb.AppendFormat("Rev Accuracy:   ({0}/{1}) {2}%", sumCorrect, totalC, 100.0 * (double)sumCorrect / (double)totalC);
             sb.AppendLine();
+            sb.AppendFormat("NoNoise Accuracy:   ({0}/{1}) {2}%", noNoiseSumCorrect, noNoiseC, 100.0 * (double)noNoiseSumCorrect / (double)noNoiseC);
+            nonoisesb.AppendFormat("({0}/{1}), {2}%", noNoiseSumCorrect, noNoiseC, 100.0 * (double)noNoiseSumCorrect / (double)noNoiseC);
+            sb.AppendLine();
             TextResults = sb.ToString();
             ShorterTextResults = ssb.ToString();
+            NoNoiseTextResults = nonoisesb.ToString();
         }
 
         private static String OptimalErrorEval(Partition clusterFile, LabelList labels, int[,] clusterMatching)
