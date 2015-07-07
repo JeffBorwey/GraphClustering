@@ -557,12 +557,12 @@ namespace NetMining.Graphs
             List<List<int>> edges = new List<List<int>>();
             List<List<double>> weights = new List<List<double>>();
             int numNodes = 0;
-
+            List<int> labels = new List<int>();
             using (StreamReader sr = new StreamReader(file))
             {
                 String readToEnd = sr.ReadToEnd();
                 String[] split = readToEnd.Split(new char[] { '\n', '\r', ' ' });
-
+                
                 for (int i = 0; i < split.Length; i++)
                 {
                     switch (split[i])
@@ -582,6 +582,11 @@ namespace NetMining.Graphs
                                     String nodeId = split[j + 1];
                                     nodeIdLookup[nodeId] = numNodes++;
                                 }
+                               // if (split[j] == "value")
+                               // {
+                               //    int nodevalue = int.Parse(split[j + 1]);
+                               //    labels.Add(nodevalue);
+                               // }
                                 j++;
                             }
                             break;
@@ -654,6 +659,11 @@ namespace NetMining.Graphs
             {
                 nodes.Add(new LightWeightNode(i, true, edges[i], weights[i]));
             }
+        //    for (int i = 0; i < numNodes; i++)
+         //   {
+         //       nodes[i].Label = labels[i];
+        //    }
+
 
             return new LightWeightGraph(nodes.ToArray(), isWeighted);
         }

@@ -195,7 +195,9 @@ namespace NetMining.ClusteringAlgo
 
         public KPoint[] GetClusterKPoints(int index)
         {
-            return Clusters[index].Points.Select(p => Points[p.Id]).ToArray();
+            KPoint[] myPoints = Clusters[index].Points.Select(p => Points[p.Id]).ToArray();
+            //return Clusters[index].Points.Select(p => Points[p.Id]).ToArray();
+            return myPoints;
         }
         public int DataCount 
         {

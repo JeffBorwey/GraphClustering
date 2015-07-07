@@ -10,6 +10,7 @@ using NetMining.Graphs.Generator;
 using NetMining.ADT;
 using NetMining.Files;
 using NetMining.Evaluation;
+using NetMining.ExtensionMethods;
 using System.IO;
 namespace debugNetData
 {
@@ -20,13 +21,15 @@ namespace debugNetData
             /*
             // CHECK ACCURACY ONE AT A TIME
              DelimitedFile delimitedLabelFile =
-                    new DelimitedFile("C:\\Users\\John\\Source\\Repos\\GraphClustering3\\debugNetData\\bin\\Debug\\synth\\unEqDensity\\set1\\synthD2K8.1.data");
+                        new DelimitedFile("C:\\Users\\John\\Source\\Repos\\GraphClustering3\\debugNetData\\bin\\Debug\\polbooks\\polbooks.data");
+             //new DelimitedFile("C:\\Users\\John\\Source\\Repos\\GraphClustering3\\debugNetData\\bin\\Debug\\synth\\unEqDensity\\set1\\synthD4K8.1.data");
                 int labelCol = delimitedLabelFile.Data[0].Length;
                 LabelList labels = new LabelList(delimitedLabelFile.GetColumn(labelCol - 1));
 
                 //get the Partion file
                 Partition clusterFile =
-                    new Partition("C:\\Users\\John\\Source\\Repos\\GraphClustering3\\debugNetData\\bin\\Debug\\synth\\unEqDensity\\set1\\synthD2K8_KNN_4_Beta108Partial_Weights.cluster");
+                    //new Partition("C:\\Users\\John\\Source\\Repos\\GraphClustering3\\debugNetData\\bin\\Debug\\synth\\unEqDensity\\set1\\synthD4K8_KNN_3_Beta0Partial_Weights.cluster");
+                    new Partition("C:\\Users\\John\\Source\\Repos\\GraphClustering3\\debugNetData\\bin\\Debug\\polbooks\\polbooks_Beta0.cluster");
                 //Calculate the Error
                 ExternalEval error = new ExternalEval(clusterFile, labels);
 
@@ -549,12 +552,12 @@ namespace debugNetData
 
 
 
-// NOISY DATA AUTOMATED REPORT
+// ---->>NOISY DATA AUTOMATED REPORT
             /*         
-            int dataSet = 2;
-            string path = "synth\\unEqDensity\\set" + dataSet + "\\";
+            int dataSet = 1;
+            string path = "NOverlapUneqDens\\set" + dataSet + "\\";//C:\Users\John\Source\Repos\GraphClustering3\debugNetData\bin\Debug\
             string prefix = "synthD8K8";
-            int minKNN = 3;
+            int minKNN = 200;
             int maxKNN = minKNN + 0;
             DelimitedFile delimitedLabelFile =
                     new DelimitedFile(path + prefix + "." + dataSet + ".data");
@@ -563,11 +566,13 @@ namespace debugNetData
 
             // figure out the largest beta for this series
             int maxWeighted = 0;
-            string[] filePaths = Directory.GetFiles(path, prefix + "_KNN_*" + "_Weights.cluster");
+            string[] filePaths = Directory.GetFiles(path, prefix + "_KNN_200*" + "_Weights.cluster");
             for (int i = 0; i < filePaths.Length; i++)
             {
                 string num = filePaths[i].Substring(filePaths[i].IndexOf("a") + 1);
-                num = num.Substring(0, num.IndexOf("P"));
+                num = num.Substring(num.IndexOf("a") + 1);
+                //num = num.Substring(num.IndexOf("a") + 1);
+                num = num.Substring(0, num.IndexOf("_"));
                 int numToInt = Int32.Parse(num);
                 if (numToInt > maxWeighted)
                 {
@@ -576,11 +581,13 @@ namespace debugNetData
             }
 
             int maxUnweighted = 0;
-            string[] filePathsUn = Directory.GetFiles(path, prefix + "_KNN_*" + "_NoWeights.cluster");
+            string[] filePathsUn = Directory.GetFiles(path, prefix + "_KNN_200*" + "_NoWeights.cluster");
             for (int i = 0; i < filePathsUn.Length; i++)
             {
                 string num = filePathsUn[i].Substring(filePathsUn[i].IndexOf("a") + 1);
-                num = num.Substring(0, num.IndexOf("P"));
+                num = num.Substring(num.IndexOf("a") + 1);
+                //num = num.Substring(num.IndexOf("a") + 1);
+                num = num.Substring(0, num.IndexOf("_"));
                 int numToInt = Int32.Parse(num);
                 if (numToInt > maxUnweighted)
                 {
@@ -595,7 +602,7 @@ namespace debugNetData
 
                 sw.WriteLine(path + prefix);
                 sw.WriteLine("Beta, KNN="+minKNN+"Weighted,,vat,rem,Unweighted,,vat,rem,KNN="+(minKNN+1)+"Weighted,,vat,rem,Unweighted,,vat,rem,KNN="+(minKNN+2)+"Weighted,,vat,rem,Unweighted,,vat,rem,KNN="+(minKNN+3)+"Weighted,,vat,rem,Unweighted,,vat,rem,KNN="+(minKNN+4)+"Weighted,,vat,rem,Unweighted,,vat,rem");
-                for (int beta = 0; beta <= maxOfEverything; beta++)
+                for (int beta = 0; beta <= maxOfEverything; beta+=10)
                 {
 
                     sw.Write(beta + ",");
@@ -612,7 +619,9 @@ namespace debugNetData
                         for (int j = 0; j < filePathsA.Length; j++)
                         {
                             string num = filePathsA[j].Substring(filePathsA[j].IndexOf("a") + 1);
-                            num = num.Substring(0, num.IndexOf("P"));
+                            num = num.Substring(num.IndexOf("a") + 1);
+                            //num = num.Substring(num.IndexOf("a") + 1);
+                            num = num.Substring(0, num.IndexOf("_"));
                             int numToInt = Int32.Parse(num);
                             if (numToInt > maxWeighted)
                             {
@@ -625,7 +634,9 @@ namespace debugNetData
                         for (int j = 0; j < filePathsUnA.Length; j++)
                         {
                             string num = filePathsUnA[j].Substring(filePathsUnA[j].IndexOf("a") + 1);
-                            num = num.Substring(0, num.IndexOf("P"));
+                            num = num.Substring(num.IndexOf("a") + 1);
+                            //num = num.Substring(num.IndexOf("a") + 1);
+                            num = num.Substring(0, num.IndexOf("_"));
                             int numToInt = Int32.Parse(num);
                             if (numToInt > maxUnweighted)
                             {
@@ -637,14 +648,14 @@ namespace debugNetData
                         {
                             
                             Partition clusterFile =
-                            new Partition(path + prefix + "_KNN_" + i + "_Beta" + beta + "Partial_Weights.cluster");
+                            new Partition(path + prefix + "_KNN_" + i + "_Beta" + beta + "_Weights.cluster");
 
                             //Calculate the Error
                             ExternalEval error = new ExternalEval(clusterFile, labels);
-                            sw.Write(error.NoNoiseTextResults + ",");
+                            sw.Write(error.ShorterTextResults + ",");//sw.Write(error.NoNoiseTextResults + ",");
 
                             // write the VAT here
-                            using (StreamReader sr = new StreamReader(path + prefix + "_KNN_" + i + "_Beta" + beta + "Partial_Weights.cluster"))
+                            using (StreamReader sr = new StreamReader(path + prefix + "_KNN_" + i + "_Beta" + beta + "_Weights.cluster"))
                             {
                                 sr.ReadLine();
                                 string line = sr.ReadLine();
@@ -670,15 +681,15 @@ namespace debugNetData
                         if (beta <= maxUnweighted)
                         {
                             Partition clusterFileUn =
-                           new Partition(path + prefix + "_KNN_" + i + "_Beta" + beta + "Partial_NoWeights.cluster");
+                           new Partition(path + prefix + "_KNN_" + i + "_Beta" + beta + "_NoWeights.cluster");
 
                             //Calculate the Error
                             ExternalEval errorUn = new ExternalEval(clusterFileUn, labels);
-                            sw.Write(errorUn.NoNoiseTextResults);
+                            sw.Write(errorUn.ShorterTextResults);//sw.Write(errorUn.NoNoiseTextResults);
 
                             // write the VAT here
                             sw.Write(",");
-                            using (StreamReader sr2 = new StreamReader(path + prefix + "_KNN_" + i + "_Beta" + beta + "Partial_NoWeights.cluster"))
+                            using (StreamReader sr2 = new StreamReader(path + prefix + "_KNN_" + i + "_Beta" + beta + "_NoWeights.cluster"))
                             {
                                 sr2.ReadLine();
                                 string line = sr2.ReadLine();
@@ -709,21 +720,143 @@ namespace debugNetData
                 }
             } Console.ReadKey();
 
-            //*/
-            //*  
+            // */
+ /*            
             // USING A NEW BETWEENNESS-CENTRALITY NOT RECALCULATED WAY TO COMPUTE!!!!
             int[] minks = {4,4,101,3,7,3,3,5,2};
-            string prefix = "synth\\unEqDensity\\set2after\\";
-            int KNN = 3;
+            string prefix = "synthData\\eqDensity\\set1\\";
+            int KNN = 11037;
             int end = KNN + 1;
-            int D = 8;
-            int K = 8;
-            for (KNN = 3; KNN < end; KNN++)
+            int D = 2;
+            int K = 2;
+
+            for (KNN =11037; KNN < end; KNN++)
             {
                 //PointSet points = new PointSet("wine\\wine.txt");
                 //LightWeightGraph lwg2 = LightWeightGraph.GetKNNGraph(points.GetDistanceMatrix(),KNN); // number= Kneighbors
                 //synthD2K2_Euclidean_KNN_4.graph
-                LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD"+D +"K"+K+"_Euclidean_KNN_"+ KNN + ".graph");
+                //LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD"+D +"K"+K+"_Euclidean_KNN_"+ KNN + ".graph");
+                LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD" + D + "K" + K + "_Euclidean_" + KNN + ".graph");
+                //k, weighted, double alpha = 1.0f, double beta = 0.0f, reassignNodes = true, hillClimb = true
+                int numClusters = 1;
+                int beta = 0;
+
+                // Do it the old way the first time to compute inital 
+                HVATClust vClust = new HVATClust(lwg2, 2, true, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                Partition p = vClust.GetPartition();
+                //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                p.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN + "_Beta" + beta + "Partial_Weights.cluster",
+                                        prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                List<int> nodeRemovalOrder = vClust._vatNodeRemovalOrder;
+                int numNodesRemoved = vClust._vatNumNodesRemoved;
+                beta+=10;
+                numClusters = p.Clusters.Count;
+
+
+                while (numClusters < K)
+                {                                 //graph, mink, useweights,                       alpha, beta, reassign, hillclimb 
+                    //HVATClust hvClust = new HVATClust(lwg2, 2, false, nodeRemovalOrder, numNodesRemoved, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    HVATClust hvClust = new HVATClust(lwg2, 2, true, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    Partition q = hvClust.GetPartition(nodeRemovalOrder, numNodesRemoved);
+                    //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                    q.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN +"_Beta"+beta+ "Partial_Weights.cluster", 
+                                            prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                    beta+=10;
+                    numClusters = q.Clusters.Count;
+                }
+            }
+
+            KNN = 26877;
+            end = KNN + 1;
+            D = 2;
+            K = 4;
+            for (KNN = 26877; KNN < end; KNN++)
+            {
+                //PointSet points = new PointSet("wine\\wine.txt");
+                //LightWeightGraph lwg2 = LightWeightGraph.GetKNNGraph(points.GetDistanceMatrix(),KNN); // number= Kneighbors
+                //synthD2K2_Euclidean_KNN_4.graph
+                //LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD" + D + "K" + K + "_Euclidean_" + KNN + ".graph");
+                //k, weighted, double alpha = 1.0f, double beta = 0.0f, reassignNodes = true, hillClimb = true
+                int numClusters = 1;
+                int beta = 0;
+
+                // Do it the old way the first time to compute inital 
+                HVATClust vClust = new HVATClust(lwg2, 2, true, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                Partition p = vClust.GetPartition();
+                //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                p.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN + "_Beta" + beta + "Partial_Weights.cluster",
+                                        prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                List<int> nodeRemovalOrder = vClust._vatNodeRemovalOrder;
+                int numNodesRemoved = vClust._vatNumNodesRemoved;
+                beta+=10;
+                numClusters = p.Clusters.Count;
+
+
+                while (numClusters < K)
+                {                                 //graph, mink, useweights,                       alpha, beta, reassign, hillclimb 
+                    //HVATClust hvClust = new HVATClust(lwg2, 2, false, nodeRemovalOrder, numNodesRemoved, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    HVATClust hvClust = new HVATClust(lwg2, 2, true, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    Partition q = hvClust.GetPartition(nodeRemovalOrder, numNodesRemoved);
+                    //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                    q.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN + "_Beta" + beta + "Partial_Weights.cluster",
+                                            prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                    beta+=10;
+                    numClusters = q.Clusters.Count;
+                }
+            }
+
+            KNN = 50794;
+            end = KNN + 1;
+            D = 2;
+            K = 8;
+            for (KNN = 50794; KNN < end; KNN++)
+            {
+                //PointSet points = new PointSet("wine\\wine.txt");
+                //LightWeightGraph lwg2 = LightWeightGraph.GetKNNGraph(points.GetDistanceMatrix(),KNN); // number= Kneighbors
+                //synthD2K2_Euclidean_KNN_4.graph
+                //LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD" + D + "K" + K + "_Euclidean_" + KNN + ".graph");
+                //k, weighted, double alpha = 1.0f, double beta = 0.0f, reassignNodes = true, hillClimb = true
+                int numClusters = 1;
+                int beta = 0;
+
+                // Do it the old way the first time to compute inital 
+                HVATClust vClust = new HVATClust(lwg2, 2, true, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                Partition p = vClust.GetPartition();
+                //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                p.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN + "_Beta" + beta + "Partial_Weights.cluster",
+                                        prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                List<int> nodeRemovalOrder = vClust._vatNodeRemovalOrder;
+                int numNodesRemoved = vClust._vatNumNodesRemoved;
+                beta+=10;
+                numClusters = p.Clusters.Count;
+
+
+                while (numClusters < K)
+                {                                 //graph, mink, useweights,                       alpha, beta, reassign, hillclimb 
+                    //HVATClust hvClust = new HVATClust(lwg2, 2, false, nodeRemovalOrder, numNodesRemoved, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    HVATClust hvClust = new HVATClust(lwg2, 2, true, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    Partition q = hvClust.GetPartition(nodeRemovalOrder, numNodesRemoved);
+                    //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                    q.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN + "_Beta" + beta + "Partial_Weights.cluster",
+                                            prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                    beta+=10;
+                    numClusters = q.Clusters.Count;
+                }
+            }
+            //===============
+            KNN = 11037;
+            end = KNN + 1;
+            D = 2;
+            K = 2;
+            for (KNN = 11037; KNN < end; KNN++)
+            {
+                //PointSet points = new PointSet("wine\\wine.txt");
+                //LightWeightGraph lwg2 = LightWeightGraph.GetKNNGraph(points.GetDistanceMatrix(),KNN); // number= Kneighbors
+                //synthD2K2_Euclidean_KNN_4.graph
+                //LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD" + D + "K" + K + "_Euclidean_" + KNN + ".graph");
                 //k, weighted, double alpha = 1.0f, double beta = 0.0f, reassignNodes = true, hillClimb = true
                 int numClusters = 1;
                 int beta = 0;
@@ -736,7 +869,7 @@ namespace debugNetData
                                         prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
                 List<int> nodeRemovalOrder = vClust._vatNodeRemovalOrder;
                 int numNodesRemoved = vClust._vatNumNodesRemoved;
-                beta++;
+                beta+=100;
                 numClusters = p.Clusters.Count;
 
 
@@ -746,14 +879,396 @@ namespace debugNetData
                     HVATClust hvClust = new HVATClust(lwg2, 2, false, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
                     Partition q = hvClust.GetPartition(nodeRemovalOrder, numNodesRemoved);
                     //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
-                    q.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN +"_Beta"+beta+ "Partial_NoWeights.cluster", 
+                    q.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN + "_Beta" + beta + "Partial_NoWeights.cluster",
                                             prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
-                    beta++;
+                    beta+=100;
                     numClusters = q.Clusters.Count;
                 }
             }
-            // /*
 
+            KNN = 26877;
+            end = KNN + 1;
+            D = 2;
+            K = 4;
+            for (KNN = 26877; KNN < end; KNN++)
+            {
+                //PointSet points = new PointSet("wine\\wine.txt");
+                //LightWeightGraph lwg2 = LightWeightGraph.GetKNNGraph(points.GetDistanceMatrix(),KNN); // number= Kneighbors
+                //synthD2K2_Euclidean_KNN_4.graph
+                //LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD" + D + "K" + K + "_Euclidean_" + KNN + ".graph");
+                //k, weighted, double alpha = 1.0f, double beta = 0.0f, reassignNodes = true, hillClimb = true
+                int numClusters = 1;
+                int beta = 0;
+
+                // Do it the old way the first time to compute inital 
+                HVATClust vClust = new HVATClust(lwg2, 2, false, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                Partition p = vClust.GetPartition();
+                //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                p.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN + "_Beta" + beta + "Partial_NoWeights.cluster",
+                                        prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                List<int> nodeRemovalOrder = vClust._vatNodeRemovalOrder;
+                int numNodesRemoved = vClust._vatNumNodesRemoved;
+                beta+=100;
+                numClusters = p.Clusters.Count;
+
+
+                while (numClusters < K)
+                {                                 //graph, mink, useweights,                       alpha, beta, reassign, hillclimb 
+                    //HVATClust hvClust = new HVATClust(lwg2, 2, false, nodeRemovalOrder, numNodesRemoved, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    HVATClust hvClust = new HVATClust(lwg2, 2, false, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    Partition q = hvClust.GetPartition(nodeRemovalOrder, numNodesRemoved);
+                    //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                    q.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN + "_Beta" + beta + "Partial_NoWeights.cluster",
+                                            prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                    beta+=100;
+                    numClusters = q.Clusters.Count;
+                }
+            }
+
+            KNN = 50794;
+            end = KNN + 1;
+            D = 2;
+            K = 8;
+            for (KNN = 50794; KNN < end; KNN++)
+            {
+                //PointSet points = new PointSet("wine\\wine.txt");
+                //LightWeightGraph lwg2 = LightWeightGraph.GetKNNGraph(points.GetDistanceMatrix(),KNN); // number= Kneighbors
+                //synthD2K2_Euclidean_KNN_4.graph
+                //LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD" + D + "K" + K + "_Euclidean_" + KNN + ".graph");
+                //k, weighted, double alpha = 1.0f, double beta = 0.0f, reassignNodes = true, hillClimb = true
+                int numClusters = 1;
+                int beta = 0;
+
+                // Do it the old way the first time to compute inital 
+                HVATClust vClust = new HVATClust(lwg2, 2, false, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                Partition p = vClust.GetPartition();
+                //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                p.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN + "_Beta" + beta + "Partial_NoWeights.cluster",
+                                        prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                List<int> nodeRemovalOrder = vClust._vatNodeRemovalOrder;
+                int numNodesRemoved = vClust._vatNumNodesRemoved;
+                beta+=100;
+                numClusters = p.Clusters.Count;
+
+
+                while (numClusters < K)
+                {                                 //graph, mink, useweights,                       alpha, beta, reassign, hillclimb 
+                    //HVATClust hvClust = new HVATClust(lwg2, 2, false, nodeRemovalOrder, numNodesRemoved, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    HVATClust hvClust = new HVATClust(lwg2, 2, false, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    Partition q = hvClust.GetPartition(nodeRemovalOrder, numNodesRemoved);
+                    //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                    q.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN + "_Beta" + beta + "Partial_NoWeights.cluster",
+                                            prefix + "synthD" + D + "K" + K + "_Euclidean_KNN_" + KNN + ".graph");
+                    beta+=100;
+                    numClusters = q.Clusters.Count;
+                }
+            }
+            // */
+
+        
+        /* READGML OF POLBOOKS
+
+            LightWeightGraph mygraph = LightWeightGraph.GetGraphFromGML("polblogs.gml");
+            //Console.ReadKey();
+            using (StreamWriter sw = new StreamWriter("polblogs.data", true))
+            {
+                for (int i = 0; i< mygraph.NumNodes; i++)
+                {
+                    sw.Write(i + " " + mygraph.Nodes[i].Label);
+
+                   // for (int j = 0; j < mygraph.Nodes[i].Edge.Count(); j++)
+                   // {
+                   //     sw.Write(mygraph.Nodes[i].Edge[j] + " ");
+                   // }
+
+                    sw.WriteLine();
+
+                }
+            }
+        */
+/*
+            // THIS IS THE HIGHLY DESIRABLE WHILE LOOP, Set up for REALLIFE DATA!!!!
+            
+            string prefix = "polbooks\\";
+            
+            
+                //PointSet points = new PointSet("wine\\wine.txt");
+                //LightWeightGraph lwg2 = LightWeightGraph.GetKNNGraph(points.GetDistanceMatrix(),KNN); // number= Kneighbors
+                //synthD2K2_Euclidean_KNN_4.graph
+                LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromGML(prefix + "polbooks.gml");
+                //k, weighted, double alpha = 1.0f, double beta = 0.0f, reassignNodes = true, hillClimb = true
+                int numClusters = 1;
+                int beta = 0;
+                while (numClusters < 3)
+                {                                 //graph, mink, useweights, alpha, beta, reassign, hillclimb 
+                    HVATClust vClust = new HVATClust(lwg2, 2, false, 1, beta, true, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    Partition p = vClust.GetPartition();
+                    //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                    p.SavePartition(prefix + "polbooks_" + "Beta" + beta + ".cluster",
+                                            prefix + "polbooks.gml");
+                    beta++;
+                    numClusters = p.Clusters.Count;
+                }
+  // */
+/*
+            // HVAT CALCULATION, FOR ARTIFICIAL SETS
+            int set = 2;
+            int KNN = 156546;
+            
+            int D = 4;
+            int K = 8;
+            string path = "synthData\\unEqDensity\\set"+set+"\\";
+            string filename = "synthD"+D+"K"+K+"."+set+".txt";
+            //string filename = "synthD"+D+"K"+K+"_Euclidean_KNN_"+KNN+".graph";\
+            //string filename = "synthD"+D+"K"+K+"_Euclidean_"+KNN+".graph";
+            PointSet points = new PointSet(path + filename);
+            //LightWeightGraph lwg2 = LightWeightGraph.GetKNNGraph(points.GetDistanceMatrix(), KNN);
+            //LightWeightGraph lwg2 = LightWeightGraph.GetGeometricGraph(points.GetDistanceMatrix(), .53713);
+            //LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(path + filename);
+
+
+            IPointGraphGenerator gen;
+
+
+          //  var knnGen = new KNNGraphGenerator();
+         //   knnGen.SetMinimumConnectivity();
+            //knnGen.SetSkipLast(true);
+        //    knnGen.SetMinOffset(0);
+            //knnGen.SetK(3);
+         //   gen = knnGen;
+
+            // These 3 lines just for the Geometric graphs
+            var rGen = new GeoGraphGenerator();
+            rGen.SetMinimumConnectivity();
+            gen = rGen;
+
+            HVATClust vClust = new HVATClust(points, K, gen, false, 1, 0, false, true);
+            //HVATClust vClust = new HVATClust(lwg2, K, false, 1, 0, false, true);
+            Partition p = vClust.GetPartition();
+            //p.SavePartition("ecoli\\ecoliHVAT"+KNN+"_lwg_weights_810.cluster", "ecoli\\ecoli_Euclidean_KNN_"+KNN+".graph");
+            p.SavePartition(path + "D"+D+"k"+K+"_UnEq_set"+set+"_" + KNN + "_points_NoWeights.cluster", path+filename);
+            //*/
+/* POINTS
+
+            int set = 3;
+            int KNN = 136030;
+            int D = 8;
+            int K = 4;
+            string path = "synthData\\unEqDensity\\set" + set + "\\";
+            string filename = "synthD" + D + "K" + K + "." + set + ".txt";
+            PointSet points = new PointSet(path + filename);
+            IPointGraphGenerator gen;
+            var rGen = new GeoGraphGenerator();
+            rGen.SetMinimumConnectivity();
+            gen = rGen;
+            HVATClust vClust = new HVATClust(points, K, gen, true, 1, 0, false, true);
+            Partition p = vClust.GetPartition();
+            p.SavePartition(path + "D" + D + "k" + K + "_UnEq_set" + set + "_" + KNN + "_points_Weights.cluster", path + filename);
+            
+            set = 2;
+            KNN = 88405;
+            path = "synthData\\unEqDensity\\set" + set + "\\";
+            filename = "synthD" + D + "K" + K + "." + set + ".txt";
+            points = new PointSet(path + filename);
+            rGen = new GeoGraphGenerator();
+            rGen.SetMinimumConnectivity();
+            gen = rGen;
+            vClust = new HVATClust(points, K, gen, true, 1, 0, false, true);
+            p = vClust.GetPartition();
+            p.SavePartition(path + "D" + D + "k" + K + "_UnEq_set" + set + "_" + KNN + "_points_Weights.cluster", path + filename);
+            
+            set = 3;
+            KNN = 87205;
+            path = "synthData\\unEqDensity\\set" + set + "\\";
+            filename = "synthD" + D + "K" + K + "." + set + ".txt";
+            points = new PointSet(path + filename);
+            rGen = new GeoGraphGenerator();
+            rGen.SetMinimumConnectivity();
+            gen = rGen;
+            vClust = new HVATClust(points, K, gen, true, 1, 0, false, true);
+            p = vClust.GetPartition();
+            p.SavePartition(path + "D" + D + "k" + K + "_UnEq_set" + set + "_" + KNN + "_points_Weights.cluster", path + filename);
+  
+ // */
+    /* THREE TIMES TRHOUGH HVAT FOR GEOMETRIC GRAPHS
+            int set = 1;
+            int KNN = 122239;
+            int D = 2;
+            int K = 8;
+            string path = "synthData\\unEqDensity\\set" + set + "\\";
+            string filename = "synthD" + D + "K" + K + "_Euclidean_" + KNN + ".graph";
+            LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(path + filename);
+            HVATClust vClust = new HVATClust(lwg2, K, true, 1, 0, false, true);
+            Partition p = vClust.GetPartition();
+            p.SavePartition(path + "D" + D + "k" + K + "_UnEq_set" + set + "_" + KNN + "_lwg_Weights.cluster", path + filename);
+            set = 2;
+            KNN = 119751;
+            path = "synthData\\unEqDensity\\set" + set + "\\";
+            filename = "synthD" + D + "K" + K + "_Euclidean_" + KNN + ".graph";
+            lwg2 = LightWeightGraph.GetGraphFromFile(path + filename);
+            vClust = new HVATClust(lwg2, K, true, 1, 0, false, true);
+            p = vClust.GetPartition();
+            p.SavePartition(path + "D" + D + "k" + K + "_UnEq_set" + set + "_" + KNN + "_lwg_Weights.cluster", path + filename);
+            set = 3;
+            KNN = 121350;
+            path = "synthData\\unEqDensity\\set" + set + "\\";
+            filename = "synthD" + D + "K" + K + "_Euclidean_" + KNN + ".graph";
+            lwg2 = LightWeightGraph.GetGraphFromFile(path + filename);
+            vClust = new HVATClust(lwg2, K, true, 1, 0, false, true);
+            p = vClust.GetPartition();
+            p.SavePartition(path + "D" + D + "k" + K + "_UnEq_set" + set + "_" + KNN + "_lwg_Weights.cluster", path + filename);
+ //  */     
+     /* 
+        // ACCURACY CHECK
+            int set = 2;
+            int knn = 1;
+            int D=2;
+            int K=8;
+            String file = "D"+D+"k"+K+"_UnEq_set"+set+"_"+knn+"_lwg_NoWeights.cluster";
+            String file2 = "D" + D + "k" + K + "_UnEq_set" + set + "_" + knn + "_lwg_Weights.cluster";
+            String file3 = "D" + D + "k" + K + "_UnEq_set" + set + "_" + knn + "_points_NoWeights.cluster";
+            String file4 = "D" + D + "k" + K + "_UnEq_set" + set + "_" + knn + "_points_Weights.cluster";
+            DelimitedFile delimitedLabelFile =
+                               new DelimitedFile("synth\\unEqDensity\\set"+set+"\\synthD"+D+"K"+K+"."+set+".data");
+            //new DelimitedFile("C:\\Users\\John\\Source\\Repos\\GraphClustering3\\debugNetData\\bin\\Debug\\synth\\unEqDensity\\set1\\synthD4K8.1.data");
+            int labelCol = delimitedLabelFile.Data[0].Length;
+            LabelList labels = new LabelList(delimitedLabelFile.GetColumn(labelCol - 1));
+
+            //get the Partion file
+            Partition clusterFile =
+                //new Partition("C:\\Users\\John\\Source\\Repos\\GraphClustering3\\debugNetData\\bin\\Debug\\synth\\unEqDensity\\set1\\synthD4K8_KNN_3_Beta0Partial_Weights.cluster");
+                new Partition("synthData\\unEqDensity\\set"+set+"\\" + file);
+            Partition clusterFile2 =
+                new Partition("synthData\\unEqDensity\\set" + set + "\\" + file2);
+            Partition clusterFile3 =
+                new Partition("synthData\\unEqDensity\\set" + set + "\\" + file3);
+            Partition clusterFile4 =
+                new Partition("synthData\\unEqDensity\\set" + set + "\\" + file4);
+            //Calculate the Error
+            ExternalEval error = new ExternalEval(clusterFile, labels);
+            ExternalEval error2 = new ExternalEval(clusterFile2, labels);
+            ExternalEval error3 = new ExternalEval(clusterFile3, labels);
+            ExternalEval error4 = new ExternalEval(clusterFile4, labels);
+
+            using (StreamWriter sw = new StreamWriter("synthData\\unEqDensity\\set"+set+"\\allresults.txt", true))
+            {
+                sw.WriteLine(file);
+               sw.WriteLine(error.TextResults);
+               sw.WriteLine("");
+               sw.WriteLine(file2);
+               sw.WriteLine(error2.TextResults);
+               sw.WriteLine("");
+               sw.WriteLine(file3);
+               sw.WriteLine(error3.TextResults);
+               sw.WriteLine("");
+               sw.WriteLine(file4);
+               sw.WriteLine(error4.TextResults);
+               sw.WriteLine("");
+             }
+            Console.WriteLine(error.TextResults);
+            Console.WriteLine(error2.TextResults);
+            Console.WriteLine(error3.TextResults);
+            Console.WriteLine(error4.TextResults);
+
+            Console.ReadKey();   
+            
+   // */
+/*
+            // CALCULATING BETA VAT BASED ON POINT SETS ONLY!
+            // MINKNN AND GEOMETRIC ONLY!
+
+
+            int set = 1;
+            int KNN = 200;
+            int D = 8;
+            int K = 8;
+            int KNNinit = KNN;
+            int end = KNN + 1;
+            string prefix = "NOverlapUneqDens\\set" + set + "\\";
+            string filename = "synthD" + D + "K" + K + "_Euclidian_KNN_" + KNN + ".graph";
+            string pointSetName = "synthD" + D + "K" + K + "." + set + ".txt";
+
+            for (KNN = KNNinit; KNN < end; KNN++)
+            {
+                PointSet points = new PointSet(prefix + "\\synthD"+D+"K"+K+"."+set+".txt");
+                //LightWeightGraph lwg2 = LightWeightGraph.GetKNNGraph(points.GetDistanceMatrix(),KNN); // number= Kneighbors
+                //synthD2K2_Euclidean_KNN_4.graph
+                //LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD"+D +"K"+K+"_Euclidean_KNN_"+ KNN + ".graph");
+                //LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(prefix + "synthD" + D + "K" + K + "_Euclidean_" + KNN + ".graph");
+                //k, weighted, double alpha = 1.0f, double beta = 0.0f, reassignNodes = true, hillClimb = true
+                int numClusters = 1;
+                int beta = 0;
+
+                IPointGraphGenerator gen;
+          //      var knnGen = new KNNGraphGenerator();
+          //      knnGen.SetMinimumConnectivity();
+                //knnGen.SetSkipLast(true);
+          //      knnGen.SetMinOffset(0);
+                
+                //knnGen.SetK(3);
+          //      gen = knnGen;
+                
+                // These 3 lines just for the Geometric graphs
+                var rGen = new GeoGraphGenerator();
+                rGen.SetMinimumConnectivity();
+                gen = rGen;
+                LightWeightGraph lwg2 = rGen.GenerateGraph(points.GetDistanceMatrix());
+                
+                
+
+                // Do it the old way the first time to compute inital 
+                //HVATClust vClust = new HVATClust(points, 2, gen, true, 1, beta, true, true);
+                HVATClust vClust = new HVATClust(lwg2, 2, false, 1, beta, true, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                Partition p = vClust.GetPartition();
+                //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                p.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN + "_Beta" + beta + "_NoWeights.cluster",
+                                        prefix + filename);
+                List<int> nodeRemovalOrder = vClust._vatNodeRemovalOrder;
+                int numNodesRemoved = vClust._vatNumNodesRemoved;
+                beta += 10;
+                numClusters = p.Clusters.Count;
+
+
+                while (numClusters < K)
+                {                                 //graph, mink, useweights,                       alpha, beta, reassign, hillclimb 
+                    //HVATClust hvClust = new HVATClust(lwg2, 2, false, nodeRemovalOrder, numNodesRemoved, 1, beta, false, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    HVATClust hvClust = new HVATClust(lwg2, 2, false, 1, beta, true, true);
+                    //HVATClust hvClust = new HVATClust(points, 2, gen, true, 1, beta, true, true);//new HVATClust(swissPoints, 4, false, true, 1);
+                    Partition q = hvClust.GetPartition(nodeRemovalOrder, numNodesRemoved);
+                    //p.SavePartition("wineLOO\\wine_NoWeights"+KNN+"_21_" + beta + ".cluster", "wine\\wine_Euclidean_KNN_"+KNN+".graph");
+                    q.SavePartition(prefix + "synthD" + D + "K" + K + "_KNN_" + KNN + "_Beta" + beta + "_NoWeights.cluster",
+                                            prefix + filename);
+                    beta += 10;
+                    numClusters = q.Clusters.Count;
+                }
+            }
+
+
+
+   
+  //  */
+           //================================================
+
+            // This program prints the INTERNAL VALIDATIONS in a spreadsheet format
+            String dataSet = "ecoli";
+            String path = "InternalEvaluation\\" + dataSet + "IE";
+            String[] filePaths = Directory.GetFiles(path, "*.cluster");
+
+            using (StreamWriter sw = new StreamWriter(path + ".csv", true))
+            {
+                sw.WriteLine("Name, Dunn, AvgSilhouette, DaviesBouldin");
+                for (int j = 0; j < filePaths.Length; j++)
+                {
+                    String safeFileName = filePaths[j].GetShortFilename().GetFilenameNoExtension();
+                    Partition clusters = new Partition(filePaths[j]);
+                    sw.WriteLine(safeFileName + "," + InternalEval.avgDunnIndex(clusters) + ","
+                    + InternalEval.AverageSilhouetteIndex(clusters) + "," + InternalEval.DaviesBouldinIndex(clusters));
+                }
+            }
+            
+            //=================================================
         }  
 
 

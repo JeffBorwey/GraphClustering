@@ -18,6 +18,7 @@ namespace GraphClustering
             foreach (String fn in fileNames)
             {
                 String safeFileName = fn.GetShortFilename().GetFilenameNoExtension();
+                //String safeFileName = fn;
 
                 Partition clusters = new Partition(fn);
                 dataGridView1.Rows.Add(safeFileName, InternalEval.avgDunnIndex(clusters),
