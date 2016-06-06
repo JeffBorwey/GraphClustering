@@ -65,6 +65,7 @@ namespace NetMining.Evaluation
                 gtBySize[gt] = new KeyValuePair<int, int>(gt, labelSize);
             }
             //Sort descending by size
+            // THIS LINE MAKES IT NOT WORK FOR K8 GRAPHS WITH NOISE!!
             Array.Sort(gtBySize, (x, y) => y.Value.CompareTo(x.Value));
 
             int sumCorrect = 0;

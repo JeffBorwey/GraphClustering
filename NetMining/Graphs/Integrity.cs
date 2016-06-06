@@ -6,7 +6,7 @@ using NetMining.ClusteringAlgo;
 using NetMining.ExtensionMethods;
 namespace NetMining.Graphs
 {
-    public class VAT : IClusteringAlgorithm
+    public class Integrity : IClusteringAlgorithm
     {
         private readonly bool[] _removedNodes;
         private LightWeightGraph g;
@@ -34,7 +34,7 @@ namespace NetMining.Graphs
 
         private readonly bool _reassignNodes;
         //Vat computes given a graph
-        public VAT(LightWeightGraph lwg, bool reassignNodes = true, double alpha = 1.0f, double beta = 0.0f)
+        public Integrity(LightWeightGraph lwg, bool reassignNodes = true, double alpha = 1.0f, double beta = 0.0f)
         {
 
             //set our alpha and beta variables
@@ -55,7 +55,7 @@ namespace NetMining.Graphs
 
             bool threaded = Settings.Threading.ThreadHVAT;
             //This is where our estimate for Vat is calculated
-            for (int n = 0; n < g.NumNodes / 2; n++)  // this was 32, I think a typo?
+            for (int n = 0; n < g.NumNodes - 1; n++)  // was g.NumNodes / 2
             {
                 //get the graph
                 LightWeightGraph gItter = new LightWeightGraph(g, _removedNodes);
@@ -73,7 +73,7 @@ namespace NetMining.Graphs
                 _nodeRemovalOrder.Add(labelOfMax);
                 _removedNodes[labelOfMax] = true;
                 //calculate vat and update the record
-                double vat = CalculateVAT(_removedNodes);
+                double vat = CalculateIntegrity(_removedNodes);
                 if (vat < _minVat)
                 {
                     _minVat = vat;
@@ -88,7 +88,7 @@ namespace NetMining.Graphs
                 _removedNodes[_nodeRemovalOrder[i]] = true;
         }
 
-        public VAT(LightWeightGraph lwg, bool reassignNodes = true, double alpha = 1.0f, double beta = 0.0f, List<int> nodeRemovalOrder = null, int numNodesRemoved = 0)
+        public Integrity(LightWeightGraph lwg, bool reassignNodes = true, double alpha = 1.0f, double beta = 0.0f, List<int> nodeRemovalOrder = null, int numNodesRemoved = 0)
         {
 
             //set our alpha and beta variables
@@ -110,7 +110,7 @@ namespace NetMining.Graphs
 
             //bool threaded = Settings.Threading.ThreadHVAT;
             //This is where our estimate for Vat is calculated
-            for (int n = 0; n < g.NumNodes / 2; n++)  // this was 32, I think a typo?
+            for (int n = 0; n < g.NumNodes; n++)  // This was evaluating g.Numnodes/2
             {
                 //get the graph
                 LightWeightGraph gItter = new LightWeightGraph(g, _removedNodes);
@@ -129,7 +129,7 @@ namespace NetMining.Graphs
                 //_nodeRemovalOrder.Add(labelOfMax);
                 _removedNodes[labelOfMax] = true;
                 //calculate vat and update the record
-                double vat = CalculateVAT(_removedNodes);
+                double vat = CalculateIntegrity(_removedNodes);
                 if (vat < _minVat)
                 {
                     _minVat = vat;
@@ -145,7 +145,6 @@ namespace NetMining.Graphs
         }
 
         
-
 
         public LightWeightGraph GetAttackedGraph()
         {
@@ -272,7 +271,7 @@ namespace NetMining.Graphs
         }
 
         //Use GetComponents
-        private double CalculateVAT(bool[] s)
+        private double CalculateIntegrity(bool[] s)
         {
             //We must get the size of S
             bool[] sClone = (bool[])s.Clone();
@@ -289,8 +288,8 @@ namespace NetMining.Graphs
 
             int cMax = components.Select(c => c.Count).Max();
 
-            //calculate VAT
-            return (Alpha * sizeS + Beta) / (g.NumNodes - sizeS - cMax + 1.0f);
+            //calculate Integrity = |S| + cMax
+            return (sizeS + cMax);
         }
 
         /// <summary>
@@ -310,7 +309,7 @@ namespace NetMining.Graphs
             {
                 //flip a bit and calculate
                 s[i] ^= true;
-                double vat = CalculateVAT(s);
+                double vat = CalculateIntegrity(s);
                 if (vat < bestVAT)
                 {
                     bestVAT = vat;
@@ -354,7 +353,7 @@ namespace NetMining.Graphs
                     //flip a bit and calculate
 
                     s[i] ^= true;
-                    double vat = CalculateVAT(s);
+                    double vat = CalculateIntegrity(s);
                     if (vat < bestVAT)
                     {
                         bestVAT = vat;
@@ -408,7 +407,7 @@ namespace NetMining.Graphs
                     //flip a bit and calculate
 
                     s[i] ^= true;
-                    double vat = CalculateVAT(s);
+                    double vat = CalculateIntegrity(s);
                     if (vat < bestVAT)
                     {
                         bestVAT = vat;
@@ -439,11 +438,11 @@ namespace NetMining.Graphs
                 for (int i = 0; i < g.NumNodes; i++)
                 {
                     for (int j = 1; j < g.NumNodes && j != i; j++)
-                    { 
+                    {
                         //flip a bit and calculate
                         s[i] ^= true;
                         s[j] ^= true;
-                        double vat = CalculateVAT(s);
+                        double vat = CalculateIntegrity(s);
                         if (vat < bestVAT)
                         {
                             bestVAT = vat;
@@ -477,8 +476,5 @@ namespace NetMining.Graphs
             _numNodesRemoved = _removedNodes.Count(c => c);
             _performedHillClimb = true;
         }
-
     }
-
-
 }

@@ -52,6 +52,10 @@
     <Compile Include="ADT\QuadTree.cs" />
     <Compile Include="ClusteringAlgo\Cluster.cs" />
     <Compile Include="ClusteringAlgo\ClusteredItem.cs" />
+    <Compile Include="ClusteringAlgo\HIntegrityClust.cs" />
+    <Compile Include="ClusteringAlgo\HScatteringClust.cs" />
+    <Compile Include="ClusteringAlgo\HTenacityClust.cs" />
+    <Compile Include="ClusteringAlgo\HToughnessClust.cs" />
     <Compile Include="ClusteringAlgo\HVATClust.cs" />
     <Compile Include="ClusteringAlgo\IClusteringAlgorithm.cs" />
     <Compile Include="ClusteringAlgo\KMeans.cs" />
@@ -75,10 +79,14 @@
     <Compile Include="Graphs\Generator\KNNGraphGenerator.cs" />
     <Compile Include="Graphs\Generator\StochasticMSTGraphGenerator.cs" />
     <Compile Include="Graphs\Generator\RandomGraphGenerator.cs" />
+    <Compile Include="Graphs\Integrity.cs" />
     <Compile Include="Graphs\LightWeightGraph.cs" />
+    <Compile Include="Graphs\Scattering.cs" />
     <Compile Include="Graphs\ShortestPathProvider.cs" />
     <Compile Include="Data\KPoint.cs" />
     <Compile Include="ClusteringAlgo\Partition.cs" />
+    <Compile Include="Graphs\Tenacity.cs" />
+    <Compile Include="Graphs\Toughness.cs" />
     <Compile Include="Graphs\VAT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\Threading.cs" />
