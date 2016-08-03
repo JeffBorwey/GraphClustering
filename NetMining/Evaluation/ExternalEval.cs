@@ -66,8 +66,11 @@ namespace NetMining.Evaluation
             }
             //Sort descending by size
             // THIS LINE MAKES IT NOT WORK FOR K8 GRAPHS WITH NOISE!!
-            Array.Sort(gtBySize, (x, y) => y.Value.CompareTo(x.Value));
-
+            // trying the if statement which will only sort for k=2,4 graphs
+            if (L.LabelIndices.GetLength(0) < 1000)
+            {
+                Array.Sort(gtBySize, (x, y) => y.Value.CompareTo(x.Value));
+            }
             int sumCorrect = 0;
             int noNoiseSumCorrect = 0;
             StringBuilder sb = new StringBuilder();

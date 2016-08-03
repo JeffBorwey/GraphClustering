@@ -19,64 +19,71 @@ namespace debugNetData
     {
         static void Main(string[] args)
         {
-            //*
-            //int set = 2;
-            String set = "";
+           /*
+             //int set = 2;
+             String set = "";
             //String path = "C:\\Users\\John\\Dropbox\\ClustProject\\John\\ResilienceMeasureClustering\\synthDataNoise\\UnEqDensity\\set" + set + "\\";
-            String path = "C:\\Users\\John\\Dropbox\\ClustProject\\John\\wine\\";
-            String file = "wine";
+            //String path = "C:\\Users\\John\\Dropbox\\ClustProject\\SyntheticLFRNets\\binary_networks\\John\\";
+            String path = "C:\\Users\\John\\Dropbox\\ClustProject\\John\\PercentageConnected\\iris\\";
+            String file = "iris_Euclidean_KNN_0.7_25";
             DelimitedFile delimitedLabelFile =
-             new DelimitedFile(path + file + ".data");
-            int labelCol = delimitedLabelFile.Data[0].Length;
-            LabelList labels = new LabelList(delimitedLabelFile.GetColumn(labelCol - 1));
-            Partition clusterFile = new Partition(path + file + "vat.cluster");
-            Partition clusterFile2 = new Partition(path + file + "int.cluster");
-            Partition clusterFile3 = new Partition(path + file + "tou.cluster");
-            Partition clusterFile4 = new Partition(path + file + "ten.cluster");
-            Partition clusterFile5 = new Partition(path + file + "sca.cluster");
-            ExternalEval error = new ExternalEval(clusterFile, labels);
-            ExternalEval error2 = new ExternalEval(clusterFile2, labels);
-            ExternalEval error3 = new ExternalEval(clusterFile3, labels);
-            ExternalEval error4 = new ExternalEval(clusterFile4, labels);
-            ExternalEval error5 = new ExternalEval(clusterFile5, labels);
-            Console.WriteLine(error.TextResults); Console.WriteLine("");
-            Console.WriteLine(error2.TextResults); Console.WriteLine("");
-            Console.WriteLine(error3.TextResults); Console.WriteLine("");
-            Console.WriteLine(error4.TextResults); Console.WriteLine("");
-            Console.WriteLine(error5.TextResults); Console.WriteLine("");
-            using (StreamWriter sw = new StreamWriter(path + "results.txt", true))
-            {
-                sw.Write(file + "VAT");
-                sw.WriteLine(error.TextResults + ","); sw.Write(file + "INT");
-                sw.WriteLine(error2.TextResults + ","); sw.Write(file + "TOU");
-                sw.WriteLine(error3.TextResults + ","); sw.Write(file + "TEN");
-                sw.WriteLine(error4.TextResults + ","); sw.Write(file + "SCA");
-                sw.WriteLine(error5.TextResults + ",");
+             //new DelimitedFile(path + file + ".data");
+             new DelimitedFile(path + "iris.data");
+             int labelCol = delimitedLabelFile.Data[0].Length;
+             LabelList labels = new LabelList(delimitedLabelFile.GetColumn(labelCol - 1));
+             Partition clusterFile = new Partition(path + file + "vat.cluster");
+             Partition clusterFile2 = new Partition(path + file + "int.cluster");
+             Partition clusterFile3 = new Partition(path + file + "tou.cluster");
+             Partition clusterFile4 = new Partition(path + file + "ten.cluster");
+             Partition clusterFile5 = new Partition(path + file + "sca.cluster");
+             ExternalEval error = new ExternalEval(clusterFile, labels);
+             ExternalEval error2 = new ExternalEval(clusterFile2, labels);
+             ExternalEval error3 = new ExternalEval(clusterFile3, labels);
+             ExternalEval error4 = new ExternalEval(clusterFile4, labels);
+             ExternalEval error5 = new ExternalEval(clusterFile5, labels);
+             Console.WriteLine(error.TextResults); Console.WriteLine("");
+             Console.WriteLine(error2.TextResults); Console.WriteLine("");
+             Console.WriteLine(error3.TextResults); Console.WriteLine("");
+             Console.WriteLine(error4.TextResults); Console.WriteLine("");
+             Console.WriteLine(error5.TextResults); Console.WriteLine("");
+             //Console.ReadKey();
+             //*
+             using (StreamWriter sw = new StreamWriter(path + "results.txt", true))
+             {
+                 sw.Write(file + "VAT");
+                 sw.WriteLine(error.TextResults + ","); sw.Write(file + "INT");
+                 sw.WriteLine(error2.TextResults + ","); sw.Write(file + "TOU");
+                 sw.WriteLine(error3.TextResults + ","); sw.Write(file + "TEN");
+                 sw.WriteLine(error4.TextResults + ","); sw.Write(file + "SCA");
+                 sw.WriteLine(error5.TextResults + ",");
 
-                sw.WriteLine("");
-            }
-            Console.ReadKey();
+                 sw.WriteLine("");
+             }
+
+             Console.ReadKey();
+            // */
             // */
             /*
-            // CHECK ACCURACY ONE AT A TIME
+            // THIS IS ACCURACY REPORT 7-4-16
 
             int set = 1;
-            for (set = 2; set < 4; set++)
+            for (set = 1; set < 11; set++)
             {
                 for (int D = 2; D <= 8; D = D * 2)
                 {
                     for (int K = 2; K <= 8; K = K * 2)
                     {
                         //int D = 2; int K = 2;
-                        String path = "C:\\Users\\John\\Dropbox\\ClustProject\\John\\ResilienceMeasureClustering\\synthDataNoise\\UnEqDensity\\set" + set + "\\";
-                        String file = "synthD" + D + "K" + K;
+                        String path = "C:\\Users\\John\\Dropbox\\ClustProject\\LitData\\DataGeneration\\eq10N-unweighted-reassign-2dhill\\";
+                        String dataPath = "C:\\Users\\John\\Dropbox\\ClustProject\\LitData\\DataGeneration\\eq10N\\";
+                        String file = "synthD" + D + "K" + K + "." + set;
 
                         DelimitedFile delimitedLabelFile =
                          //new DelimitedFile("C:\\Users\\John\\Source\\Repos\\GraphClustering3\\debugNetData\\bin\\Debug\\polbooks\\polbooks.data");
-                         new DelimitedFile(path + file + "." + set + ".data");
+                         new DelimitedFile(dataPath + file + ".data");
                         int labelCol = delimitedLabelFile.Data[0].Length;
                         LabelList labels = new LabelList(delimitedLabelFile.GetColumn(labelCol - 1));
-                        if (!File.Exists(path+file+"VAT.cluster"))
+                        if (!File.Exists(path + file + "VAT.cluster"))
                         {
                             continue;
                         }
@@ -93,18 +100,30 @@ namespace debugNetData
                         ExternalEval error3 = new ExternalEval(clusterFile3, labels);
                         ExternalEval error4 = new ExternalEval(clusterFile4, labels);
                         ExternalEval error5 = new ExternalEval(clusterFile5, labels);
-
-                        using (StreamWriter sw = new StreamWriter(path + "results.txt", true))
+                       
+                        using (StreamWriter sw = new StreamWriter(path + "results2.txt", true))
                         {
                             sw.Write(file + ",");
-                            sw.Write(error.NoNoiseTextResults + ",");
+                            sw.Write(error.NoNoiseTextResults + ",");  // use NoNoise for noisy data no reassign
                             sw.Write(error2.NoNoiseTextResults + ",");
                             sw.Write(error3.NoNoiseTextResults + ",");
                             sw.Write(error4.NoNoiseTextResults + ",");
                             sw.Write(error5.NoNoiseTextResults + ",");
 
-                            sw.WriteLine("");
+                           sw.WriteLine("");
                         }
+                       
+                       // using (StreamWriter sw = new StreamWriter(path + "results.txt", true))
+                       // {
+                       //     sw.Write(file + ",");
+                       //     sw.Write(error.ShorterTextResults + ",");  // use ShorterTextResults for no noise
+                       //     sw.Write(error2.ShorterTextResults + ",");
+                       //     sw.Write(error3.ShorterTextResults + ",");
+                       //     sw.Write(error4.ShorterTextResults + ",");
+                       //     sw.Write(error5.ShorterTextResults + ",");
+
+                      //      sw.WriteLine("");
+                      //  }
                         Console.Write(file + ",");
                         Console.Write(error.NoNoiseTextResults + ",");
                         Console.Write(error2.NoNoiseTextResults + ",");
@@ -1655,40 +1674,142 @@ string prefix = "polbooks\\";
 
 
             /*
-            for (int set = 1; set < 4; set++)
+            for (int set = 9; set < 11; set++)
             {
-                String path = "C:\\Users\\John\\Dropbox\\ClustProject\\John\\ResilienceMeasureClustering\\synthDataNoise\\UnEqDensity\\set"+set+"\\";
+                String path = "C:\\Users\\John\\Dropbox\\ClustProject\\LitData\\DataGeneration\\unEq10N\\";
+                String pathDest = "C:\\Users\\John\\Dropbox\\ClustProject\\LitData\\DataGeneration\\unEq10N-unweighted-reassign-2dhill\\";
+                //String path = "C:\\Users\\John\\Dropbox\\ClustProject\\LitData\\DataGeneration\\Uneq10N\\";
+                //String pathDest = "C:\\Users\\John\\Dropbox\\ClustProject\\LitData\\DataGeneration\\Uneq10N-unweighted-reassign-2dhill\\";
+                Boolean useweights = false;
+                Boolean reassign = true;
+                Boolean hillclimb = true;
                 for (int D = 2; D <= 8; D = D * 2)
                 {
                     for (int K = 2; K <= 8; K = K * 2)
                     {
-                        //int D = 2;  int K = 4;
-                        String grph = "synthD" + D + "K" + K;
+                        //D = 4;  K = 8;
+                        String grph = "synthD" + D + "K" + K+"."+set;
+                        if (!File.Exists(path + grph + ".graph"))
+                        {
+                            continue;
+                        }
+                        Console.WriteLine(grph);
                         LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(path + grph + ".graph");
                         //graph, mink, useweights, alpha, beta, reassign, hillclimb 
-                        HVATClust clust1 = new HVATClust(lwg2, K, false, 1, 0, true, false);
+                        HVATClust clust1 = new HVATClust(lwg2, K, useweights, 1, 0, reassign, hillclimb);
                         Partition p = clust1.GetPartition();
-                        p.SavePartition(path + grph + "VAT.cluster", path + grph + ".graph");
-                        HIntegrityClust clust2 = new HIntegrityClust(lwg2, K, false, 1, 0, true, false);
+                        p.SavePartition(pathDest + grph + "VAT.cluster", path + grph + ".graph");
+                        HIntegrityClust clust2 = new HIntegrityClust(lwg2, K, useweights, 1, 0, reassign, hillclimb);
                         Partition p2 = clust2.GetPartition();
-                        p2.SavePartition(path + grph + "Int.cluster", path + grph + ".graph");
-                        HToughnessClust clust3 = new HToughnessClust(lwg2, K, false, 1, 0, true, false);
+                        p2.SavePartition(pathDest + grph + "Int.cluster", path + grph + ".graph");
+                        HToughnessClust clust3 = new HToughnessClust(lwg2, K, useweights, 1, 0, reassign, hillclimb);
                         Partition p3 = clust3.GetPartition();
-                        p3.SavePartition(path + grph + "Tou.cluster", path + grph + ".graph");
-                        HTenacityClust clust4 = new HTenacityClust(lwg2, K, false, 1, 0, true, false);
+                        p3.SavePartition(pathDest + grph + "Tou.cluster", path + grph + ".graph");
+                        HTenacityClust clust4 = new HTenacityClust(lwg2, K, useweights, 1, 0, reassign, hillclimb);
                         Partition p4 = clust4.GetPartition();
-                        p4.SavePartition(path + grph + "Ten.cluster", path + grph + ".graph");
-                        HScatteringClust clust5 = new HScatteringClust(lwg2, K, false, 1, 0, true, false);
+                        p4.SavePartition(pathDest + grph + "Ten.cluster", path + grph + ".graph");
+                        HScatteringClust clust5 = new HScatteringClust(lwg2, K, useweights, 1, 0, reassign, hillclimb);
                         Partition p5 = clust5.GetPartition();
-                        p5.SavePartition(path + grph + "Sca.cluster", path + grph + ".graph");
+                        p5.SavePartition(pathDest + grph + "Sca.cluster", path + grph + ".graph");
 
                     }
                 }
             }
             //*/
 
+            /*            // create graphs from data files
+                        KPoint.DistType distType = KPoint.DistType.Euclidean;
+                        //for (int set = 1; set < 11; set++)
+                        //{
+                            String path = "C:\\Users\\John\\Dropbox\\ClustProject\\John\\PercentageConnected\\iris\\";
+            //for (int D = 8; D <= 8; D = D * 2)
+            //{
+            //for (int K = 2; K <= 8; K = K * 2)
+            // {
+            double percentage = .65;
+            String grph = "iris";
+                                    // String grph = "synthD8K8.1";
+                                    //String grph = "synthD" + D + "K" + K + "." + set;
+                                    PointSet points = new PointSet(path + grph + ".txt");
+                                    String graphPrefix = grph + "_" + distType.ToString() + "_KNN_" + percentage + "_";
+                                    DistanceMatrix distMatrix = points.GetDistanceMatrix(distType);
+                                    List<double> distances = distMatrix.GetSortedDistanceList();
+                                    int minConnectIndex = LightWeightGraph.BinSearchKNNMinConnectivity(2, points.Count - 1, points.Count, distMatrix, percentage);
+                                    LightWeightGraph lwg = LightWeightGraph.GetKNNGraph(distMatrix, minConnectIndex);
+                                    lwg.SaveGML(path + graphPrefix + minConnectIndex + ".gml");
+                                    //lwg.SaveGraph(path + grph + ".graph");
+                                    lwg.SaveGraph(path + graphPrefix + minConnectIndex + ".graph");
 
+            //}
+            //}
+            //}
+            //  */
+
+            /*
+                        DelimitedFile delimitedLabelFile =
+                                new DelimitedFile("C:\\Users\\John\\Dropbox\\ClustProject\\John\\synthNoiseRemoval\\set2\\synthD2K4.data");
+                        int labelCol = delimitedLabelFile.Data[0].Length;
+                        LabelList labels = new LabelList(delimitedLabelFile.GetColumn(labelCol - 1));
+
+                        //get the Partion file
+                        Partition clusterFile =
+                            new Partition("C:\\Users\\John\\Dropbox\\ClustProject\\John\\synthNoiseRemoval\\set2\\synthD8K4_KNN_3_Beta474_NoWeights.cluster");
+
+                        //Calculate the Error
+                        ExternalEval error = new ExternalEval(clusterFile, labels);
+
+                        using (StreamWriter sw = new StreamWriter("C:\\Users\\John\\Dropbox\\ClustProject\\John\\synthNoiseRemoval\\set2\\cluisterAccuracy.txt", true))
+                        {
+                            sw.WriteLine("synthD8K4_KNN_3_Beta474_NoWeights.cluster");
+                            sw.WriteLine(error.TextResults);
+                            sw.WriteLine("");
+                        }
+                        Console.WriteLine(error.TextResults);
+
+                    Console.ReadKey(); 
+
+            */
+            //*
+            String path = "C:\\Users\\John\\Dropbox\\ClustProject\\John\\PercentageConnected\\Uneq0N\\";
+            String pathDest = "C:\\Users\\John\\Dropbox\\ClustProject\\John\\PercentageConnected\\Uneq0N\\output\\";
+            //String path = "C:\\Users\\John\\Dropbox\\ClustProject\\SyntheticLFRNets\\binary_networks\\John\\";
+            //String pathDest = "C:\\Users\\John\\Dropbox\\ClustProject\\SyntheticLFRNets\\binary_networks\\John\\";
+            //String path = "C:\\Users\\John\\Dropbox\\ClustProject\\LitData\\DataGeneration\\Uneq10N\\";
+            //String pathDest = "C:\\Users\\John\\Dropbox\\ClustProject\\LitData\\DataGeneration\\Uneq10N-unweighted-reassign-2dhill\\";
+            Boolean useweights = false;
+                        Boolean reassign = true;
+                        Boolean hillclimb = false;
+                        //for (int D = 2; D <= 8; D = D * 2)
+                        //{
+                        //    for (int K = 2; K <= 8; K = K * 2)
+                        //    {
+                        int K = 8;        
+                        //D = 4;  K = 8;
+                                String grph = "synthD4K8.6_Euclidean_KNN_0.4_100";
+
+                                Console.WriteLine(grph);
+                                LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(path + grph + ".graph");
+                                //LightWeightGraph lwg2 = LightWeightGraph.GetGraphFromFile(path + grph + ".graph");
+                                //graph, mink, useweights, alpha, beta, reassign, hillclimb 
+                                HVATClust clust1 = new HVATClust(lwg2, K, useweights, 1, 0, reassign, hillclimb);
+                                Partition p = clust1.GetGPartition();
+                                p.SavePartition(pathDest + grph + "VAT.cluster", path + grph + ".graph");
+                                HIntegrityClust clust2 = new HIntegrityClust(lwg2, K, useweights, 1, 0, reassign, hillclimb);
+                                Partition p2 = clust2.GetGPartition();
+                                p2.SavePartition(pathDest + grph + "Int.cluster", path + grph + ".graph");
+                                HToughnessClust clust3 = new HToughnessClust(lwg2, K, useweights, 1, 0, reassign, hillclimb);
+                                Partition p3 = clust3.GetGPartition();
+                                p3.SavePartition(pathDest + grph + "Tou.cluster", path + grph + ".graph");
+                                HTenacityClust clust4 = new HTenacityClust(lwg2, K, useweights, 1, 0, reassign, hillclimb);
+                                Partition p4 = clust4.GetGPartition();
+                                p4.SavePartition(pathDest + grph + "Ten.cluster", path + grph + ".graph");
+                                HScatteringClust clust5 = new HScatteringClust(lwg2, K, useweights, 1, 0, reassign, hillclimb);
+                                Partition p5 = clust5.GetGPartition();
+                                p5.SavePartition(pathDest + grph + "Sca.cluster", path + grph + ".graph");
+            //*/
 
         }
-    }
+                
+   
+}
 }

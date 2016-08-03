@@ -203,5 +203,31 @@ namespace NetMining.ClusteringAlgo
         {
             get { return Data.Count; }
         }
+
+
+        public static Partition GetPartition(LightWeightGraph lwg)
+        {
+            //Get our cluster Assignment
+            List<List<int>> componentList = lwg.GetComponents();
+
+            //Setup our Clusters
+            List<Cluster> clusterList = new List<Cluster>();
+            for (int i = 0; i < componentList.Count; i++)
+            {
+                Cluster c = new Cluster(i);
+                foreach (var n in componentList[i])
+                {
+                    c.AddPoint(new ClusteredItem(lwg[n].Label));
+                }
+                clusterList.Add(c);
+            }
+
+            
+            return new Partition(clusterList, lwg);
+        }
+
     }
+
+
+
 }

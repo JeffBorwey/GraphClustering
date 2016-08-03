@@ -122,7 +122,10 @@ namespace NetMining.Graphs
         {
             return GetKNNGraph(distances, neighbors).isConnected();
         }
-
+        public static bool KNNGraphIsConnected(DistanceMatrix distances, int neighbors, double percentage)
+        {
+            return GetKNNGraph(distances, neighbors).isConnected(percentage);
+        }
         //Threshold based
         public static LightWeightGraph GetGeometricGraph(DistanceMatrix distances, double threshold)
         {
@@ -287,7 +290,7 @@ namespace NetMining.Graphs
 
             return new LightWeightGraph(nodes, true);
         }
-
+        
         /// <summary>
         /// Creates a minimum connectivity KNN Graph with an offset(if supplied
         /// </summary>
@@ -332,6 +335,35 @@ namespace NetMining.Graphs
             return 0;
         }
 
+        // A second overloaded method to search for connectivity.  This one searches if *percentage* nodes are connected, as given 
+        // in the perentage parameter.
+        // *Uses the new KNNGraphIsConnected() with percentage parameter
+        public static int BinSearchKNNMinConnectivity(int min, int max, int pointCount, DistanceMatrix distance, double percentage)
+        {
+            int mid = (min + max) / 2;
+
+            if (mid > 0)
+            {
+                Boolean graphUpIsCon = KNNGraphIsConnected(distance, mid, percentage);//graph.isConnected();
+
+                Boolean graphDownIsCon = KNNGraphIsConnected(distance, mid - 1, percentage);
+                if (graphUpIsCon && !graphDownIsCon)
+                {
+                    return mid;
+                }
+
+                if (graphUpIsCon)
+                {//Both are connected, try low end
+                    return BinSearchKNNMinConnectivity(min, mid - 1, pointCount, distance, percentage);
+                }
+                if (!graphDownIsCon)
+                {
+                    return BinSearchKNNMinConnectivity(mid + 1, max, pointCount, distance, percentage);
+                }
+            }
+
+            return 0;
+        }
         /// <summary>
         /// This function performs a 1 sided quadratic search to find the min connected KNN graph
         /// It also makes
@@ -900,6 +932,19 @@ namespace NetMining.Graphs
         public bool isConnected()
         {
             return GetComponents().Count == 1;
+        }
+
+        public bool isConnected(double percentage)
+        {
+            foreach (List<int> component in GetComponents())
+            {
+                if ((double)component.Count/Nodes.Length >= percentage)
+                {
+                    return true;
+                }
+            }
+            //return GetComponents().Count == 1;
+            return false;
         }
 
         /// <summary>

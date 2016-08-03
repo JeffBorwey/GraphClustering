@@ -342,8 +342,8 @@ namespace NetMining.Graphs
 
 
         
-        //public void HillClimb2()
-        public void HillClimb()
+        //public void HillClimb()
+        public void HillClimb2()
         {
             if (_performedHillClimb)
                 return;
@@ -395,8 +395,8 @@ namespace NetMining.Graphs
 
 
 
-        public void HillClimb2D()
-        //public void HillClimb()
+        //public void HillClimb2D()
+        public void HillClimb()
         {
             if (_performedHillClimb)
                 return;
