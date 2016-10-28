@@ -288,7 +288,7 @@ namespace NetMining.Graphs
 
             int cMax = components.Select(c => c.Count).Max();
 
-            //calculate tenacity = |S|/#connectedComponents
+            //calculate tenacity = |S|+cmax/#connectedComponents
             return (((double)sizeS + cMax) / components.Count);
         }
 

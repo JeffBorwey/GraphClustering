@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using NetMining.ClusteringAlgo;
 using NetMining.Data;
+using NetMining.Files;
 
 namespace NetMining.Evaluation
 {
@@ -67,10 +68,10 @@ namespace NetMining.Evaluation
             //Sort descending by size
             // THIS LINE MAKES IT NOT WORK FOR K8 GRAPHS WITH NOISE!!
             // trying the if statement which will only sort for k=2,4 graphs
-            if (L.LabelIndices.GetLength(0) < 1000)
-            {
+           // if (L.LabelIndices.GetLength(0) < 1000)
+           // {
                 Array.Sort(gtBySize, (x, y) => y.Value.CompareTo(x.Value));
-            }
+           // }
             int sumCorrect = 0;
             int noNoiseSumCorrect = 0;
             StringBuilder sb = new StringBuilder();
@@ -151,6 +152,94 @@ int noNoiseC = 0;
         private static String OptimalErrorEval(Partition clusterFile, LabelList labels, int[,] clusterMatching)
         {
             return "To Be Implemented";
+        }
+
+        public static double RandIndex(String labelFile, String clusterFileName)
+        {
+            //CALCULATING THE RAND INDEX
+
+            //start by parsing label file
+           DelimitedFile delimitedLabelFile = new DelimitedFile(labelFile);
+            int labelCol = delimitedLabelFile.Data[0].Length;
+            LabelList labels = new LabelList(delimitedLabelFile.GetColumn(labelCol - 1));
+
+            //get the Partion file
+            Partition clusterFile = new Partition(clusterFileName);
+            int[] assignments = new int[labels.LabelIndices.Length];
+
+            for (int cluster = 0; cluster < clusterFile.Clusters.Count; cluster++)
+            {
+                for (int j = 0; j < clusterFile.Clusters[cluster].Points.Count; j++)
+                {
+                    int clusterid = clusterFile.Clusters[cluster].Points[j].ClusterId;
+                    int id = clusterFile.Clusters[cluster].Points[j].Id;
+                    assignments[id] = clusterid;
+                }
+            }
+
+            // compare two arrays, assigments and labels.LabelIndices
+            int a = 0;
+            int b = 0;
+            for (int i = 0; i < assignments.Length; i++)
+            {
+                for (int j = i + 1; j < assignments.Length; j++)
+                {
+                    //Check for case a -> i and j are in same cluster in assignments and LabelIndices
+                    if (labels.LabelIndices[i] == labels.LabelIndices[j] && assignments[i] == assignments[j])
+                    {
+                        a++;
+                    }
+                    else if (labels.LabelIndices[i] != labels.LabelIndices[j] && assignments[i] != assignments[j])
+                    {
+                        b++;
+                    }
+                }
+            }
+
+            int denominator = assignments.Length * (assignments.Length - 1) / 2;
+            double randIndex = (a + b) / (double)denominator;
+            //return "Group A: " + a + " Group B: " + b + " RandIndex: " + randIndex;
+            return randIndex;
+        }
+
+        public static double Purity(String labelFile, String clusterFileName)
+        {
+            //start by parsing label file
+            DelimitedFile delimitedLabelFile = new DelimitedFile(labelFile);
+            int labelCol = delimitedLabelFile.Data[0].Length;
+            LabelList labels = new LabelList(delimitedLabelFile.GetColumn(labelCol - 1));
+
+            //get the Partion file
+            Partition clusterFile = new Partition(clusterFileName);
+            int[] majority = new int[clusterFile.Clusters.Count];
+
+            for (int cluster = 0; cluster < clusterFile.Clusters.Count; cluster++)
+            {
+                int[] assignments = new int[labels.UniqueLabels.Count];
+                for (int j = 0; j < clusterFile.Clusters[cluster].Points.Count; j++)
+                {
+                    int clusterid = clusterFile.Clusters[cluster].Points[j].ClusterId;
+                    int id = clusterFile.Clusters[cluster].Points[j].Id;
+                    assignments[labels.LabelIndices[id]]++;
+                }
+                // now find the max of assignments
+                int maxAssign = 0;
+                for (int k=0; k< assignments.Length; k++)
+                {
+                    if (assignments[k] > maxAssign)
+                    {
+                        maxAssign = assignments[k];
+                    }
+                }
+                majority[cluster] = maxAssign;
+            }
+            // add up majority[] and divide by number of vertices
+            int total = 0;
+            for (int i=0; i< majority.Length; i++)
+            {
+                total += majority[i];
+            }
+            return (double)total / labels.LabelIndices.Length;
         }
     }
 }

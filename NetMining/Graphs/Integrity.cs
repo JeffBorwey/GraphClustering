@@ -59,12 +59,10 @@ namespace NetMining.Graphs
             {
                 //get the graph
                 LightWeightGraph gItter = new LightWeightGraph(g, _removedNodes);
-                //sw.Restart();
+                
                 //get the betweeness
                 double[] betweeness = (threaded) ? BetweenessCentrality.ParallelBrandesBcNodes(gItter) :
                     BetweenessCentrality.BrandesBcNodes(gItter);
-                //sw.Stop();
-                //Console.WriteLine("{0} {1}ms", n+1, sw.ElapsedMilliseconds);
                 //get the index of the maximum
                 int indexMaxBetweeness = betweeness.IndexOfMax();
                 int labelOfMax = gItter.Nodes[indexMaxBetweeness].Label;
@@ -114,16 +112,7 @@ namespace NetMining.Graphs
             {
                 //get the graph
                 LightWeightGraph gItter = new LightWeightGraph(g, _removedNodes);
-                //sw.Restart();
-                //get the betweeness
-                //double[] betweeness = (threaded) ? BetweenessCentrality.ParallelBrandesBcNodes(gItter) :
-                //    BetweenessCentrality.BrandesBcNodes(gItter);
-                //sw.Stop();
-                //Console.WriteLine("{0} {1}ms", n+1, sw.ElapsedMilliseconds);
-                //get the index of the maximum
-                //int indexMaxBetweeness = betweeness.IndexOfMax();
-                //int labelOfMax = gItter.Nodes[indexMaxBetweeness].Label;
-
+                
                 //now we should add it to our list 
                 int labelOfMax = _nodeRemovalOrder[n];
                 //_nodeRemovalOrder.Add(labelOfMax);
@@ -288,8 +277,8 @@ namespace NetMining.Graphs
 
             int cMax = components.Select(c => c.Count).Max();
 
-            //calculate Integrity = |S| + cMax
-            return (sizeS + cMax);
+            //calculate Integrity = (|S| + cMax)/V
+            return ((double)sizeS + cMax)/s.Length;  // should s.length be g.numnodes?
         }
 
         /// <summary>

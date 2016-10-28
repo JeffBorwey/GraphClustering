@@ -9,7 +9,7 @@ namespace NetMining.ClusteringAlgo
     /// <summary>
     /// DataPoint holds an Id(relating it to data) and a ClusterID(relating it to a cluster)
     /// </summary>
-    public class ClusteredItem
+    public class ClusteredItem : IComparable<ClusteredItem>
     {
         public int Id;
         public int ClusterId;
@@ -17,6 +17,11 @@ namespace NetMining.ClusteringAlgo
         {
             Id = id;
             ClusterId = -1;
+        }
+        public int CompareTo(ClusteredItem compareItem)
+        {
+            
+            return this.Id.CompareTo(compareItem.Id);
         }
     }
 }
