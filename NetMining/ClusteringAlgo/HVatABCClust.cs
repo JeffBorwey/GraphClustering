@@ -12,7 +12,7 @@ namespace NetMining.ClusteringAlgo
     /// <summary>
     /// This class implements a clustering algorithm that uses the resilience measure called integrity.
     /// </summary>
-    public class HIntegrityClust : IClusteringAlgorithm
+    public class HVatABCClust : IClusteringAlgorithm
     {
         readonly AbstractDataset _data;
         private readonly int _minK;
@@ -22,25 +22,29 @@ namespace NetMining.ClusteringAlgo
         private readonly double _beta;
         private readonly bool _hillClimb;
         private readonly IPointGraphGenerator _graphGen;
+        private readonly int _k;  // variable used by ABC; looking for top k BC vertices, usually k=n/2
+        private readonly int _M;  // variable used by ABC; number of samples taken should be O(log n/error^2)
         public List<int> _vatNodeRemovalOrder;
         public int _vatNumNodesRemoved;
 
         private StringBuilder meta;
-        public HIntegrityClust(AbstractDataset data, int k, IPointGraphGenerator graphGen, bool weighted = true, double alpha = 1.0f, double beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
-            : this(k, weighted, graphGen, alpha, beta, reassignNodes, hillClimb)
+        //public HVatABCClust(AbstractDataset data, int minK, IPointGraphGenerator graphGen, bool weighted = true, double alpha = 1.0f, double beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
+        //    : this(minK, M, K, weighted, graphGen, alpha, beta, reassignNodes, hillClimb)
+       // {
+        //    _data = data;
+       // }
+
+        public HVatABCClust(LightWeightGraph data, int minK, int myM, int myK, bool weighted, double alpha = 1.0f, double beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
+            : this(minK, weighted, myM, myK, null, alpha, beta, reassignNodes, hillClimb)
         {
             _data = data;
         }
 
-        public HIntegrityClust(LightWeightGraph data, int k, bool weighted, double alpha = 1.0f, double beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
-            : this(k, weighted, null, alpha, beta, reassignNodes, hillClimb)
+        private HVatABCClust(int minK, bool weighted, int myM, int myK, IPointGraphGenerator graphGen = null, double alpha = 1.0f, double beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
         {
-            _data = data;
-        }
-
-        private HIntegrityClust(int k, bool weighted, IPointGraphGenerator graphGen = null, double alpha = 1.0f, double beta = 0.0f, bool reassignNodes = true, bool hillClimb = true)
-        {
-            _minK = k;
+            _M = myM;
+            _k = myK;
+            _minK = minK;
             _weighted = weighted;
             _graphGen = graphGen;
             _alpha = alpha;
@@ -49,7 +53,7 @@ namespace NetMining.ClusteringAlgo
             _hillClimb = hillClimb;
 
             meta = new StringBuilder();
-            meta.AppendLine("HIntegrityClust");
+            meta.AppendLine("HVatClust");
         }
         /// <summary>
         /// GetPartition() takes a connected graph (in the form of a dataset or lightweight graph), 
@@ -70,10 +74,11 @@ namespace NetMining.ClusteringAlgo
             Partition partition = new Partition(clusterList, _data);
 
             //Dictionary to hold VAT 
-            var vatMap = new Dictionary<int, Integrity>();
+            var vatMap = new Dictionary<int, VatABC>();
 
             //Dictionary to hold subset array
             var subsetMap = new Dictionary<int, int[]>();
+
             while (clusterList.Count < _minK)
             {
                 //Calculate the VAT for all values
@@ -104,15 +109,16 @@ namespace NetMining.ClusteringAlgo
 
                     subsetMap.Add(c.ClusterId, clusterSubset.ToArray());
                     lwg.IsWeighted = _weighted;
-                    Integrity v = new Integrity(lwg, _reassignNodes, _alpha, _beta);
+                    VatABC v = new VatABC(lwg, _M, _k, _reassignNodes, _alpha, _beta);
                     _vatNodeRemovalOrder = v.NodeRemovalOrder;
                     _vatNumNodesRemoved = v.NumNodesRemoved;
-                    if (_hillClimb)
-                        v.HillClimb();
+                    //if (_hillClimb)
+                    //    v.HillClimb();
+                    ////VATClust v = new VATClust(subMatrix.Mat, _weighted, _useKnn, _kNNOffset, _alpha, _beta);
                     vatMap.Add(c.ClusterId, v);
                 }
 
-                meta.AppendLine("All calculated Integritys:");
+                meta.AppendLine("All calculated VATs:");
                 //Now find the minimum vat value
                 int minVatCluster = 0;
                 double minVatValue = double.MaxValue;
@@ -132,8 +138,8 @@ namespace NetMining.ClusteringAlgo
                 var subPartition = minVAT.GetPartition();
                 var nodeIndexMap = subsetMap[minVatCluster];
 
-                meta.AppendFormat("Integrity: MinIntegrity={0}\r\n", minVAT.MinVat);
-                meta.AppendFormat("Removed Count:{0} \r\n", minVAT.NumNodesRemoved);
+                meta.AppendFormat("Vat: MinVat={0}\r\n", minVAT.MinVat);
+                meta.AppendFormat("Removed Count:{0}\r\n", minVAT.NumNodesRemoved);
                 meta.AppendLine(String.Join(",",
                     minVAT.NodeRemovalOrder.GetRange(0, minVAT.NumNodesRemoved).Select(c => nodeIndexMap[c])));
 
@@ -165,7 +171,7 @@ namespace NetMining.ClusteringAlgo
             Partition partition = new Partition(clusterList, _data);
 
             //Dictionary to hold VAT 
-            var vatMap = new Dictionary<int, Integrity>();
+            var vatMap = new Dictionary<int, VatABC>();
 
             //Dictionary to hold subset array
             var subsetMap = new Dictionary<int, int[]>();
@@ -199,9 +205,10 @@ namespace NetMining.ClusteringAlgo
 
                     subsetMap.Add(c.ClusterId, clusterSubset.ToArray());
                     lwg.IsWeighted = _weighted;
-                    Integrity v = new Integrity(lwg, _reassignNodes, _alpha, _beta, nodeRemovalOrder, numNodesRemoved);
-                    if (_hillClimb) // why is this commented out??
-                        v.HillClimb();
+                    VatABC v = new VatABC(lwg, _M, _k, _reassignNodes, _alpha, _beta);
+                    //VatABC v = new VatABC(lwg, M, k, _reassignNodes, _alpha, _beta, nodeRemovalOrder, numNodesRemoved);
+                    //if (_hillClimb)
+                    //v.HillClimb();
                     ////VATClust v = new VATClust(subMatrix.Mat, _weighted, _useKnn, _kNNOffset, _alpha, _beta);
                     vatMap.Add(c.ClusterId, v);
                 }
@@ -252,26 +259,26 @@ namespace NetMining.ClusteringAlgo
             else if (_data.Type == AbstractDataset.DataType.PointSet)
                 mat = ((PointSet)_data).GetDistanceMatrix();
 
-            // Get the actual partition (if graph not necessarily connected)
+            //get the actual partition (if graph not necessarily connected)
             Partition partition = Partition.GetPartition((LightWeightGraph)_data);
 
-            //Dictionary to hold Integrity 
-            var vatMap = new Dictionary<int, Integrity>();
+            //Dictionary to hold VAT 
+            var vatMap = new Dictionary<int, VatABC>();
 
             //Dictionary to hold subset array
             var subsetMap = new Dictionary<int, int[]>();
-            //while (clusterList.Count < _minK)
             while (partition.Clusters.Count < _minK)
+            //while (clusterList.Count < _minK)
             {
                 Console.WriteLine("Count = " + partition.Clusters.Count);
                 Console.WriteLine("mink = " + _minK);
-                //Calculate the Integrity for all values
+                //Calculate the VAT for all values
                 foreach (var c in partition.Clusters.Where(c => !vatMap.ContainsKey(c.ClusterId)))
                 {
                     //We must calculate a graph for this subset of data
                     List<int> clusterSubset = c.Points.Select(p => p.Id).ToList();
 
-                    //Now calculate Integrity
+                    //Now calculate Vat
                     LightWeightGraph lwg;
                     if (_data.Type == AbstractDataset.DataType.Graph)
                     {
@@ -293,16 +300,18 @@ namespace NetMining.ClusteringAlgo
 
                     subsetMap.Add(c.ClusterId, clusterSubset.ToArray());
                     lwg.IsWeighted = _weighted;
-                    Integrity v = new Integrity(lwg, _reassignNodes, _alpha, _beta);
+                    VatABC v = new VatABC(lwg, _M, _k, _reassignNodes, _alpha, _beta);
                     _vatNodeRemovalOrder = v.NodeRemovalOrder;
                     _vatNumNodesRemoved = v.NumNodesRemoved;
-                    if (_hillClimb)
-                        v.HillClimb();
+                    //if (_hillClimb)
+                    //    v.HillClimb();
+                    ////VATClust v = new VATClust(subMatrix.Mat, _weighted, _useKnn, _kNNOffset, _alpha, _beta);
                     vatMap.Add(c.ClusterId, v);
+                    Console.WriteLine("Calculated Vat for cluster " + c.ClusterId);
                 }
 
-                meta.AppendLine("All calculated Integritys:");
-                //Now find the minimum integrity value
+                meta.AppendLine("All calculated VATs:");
+                //Now find the minimum vat value
                 int minVatCluster = 0;
                 double minVatValue = double.MaxValue;
                 foreach (var c in vatMap)
@@ -321,32 +330,136 @@ namespace NetMining.ClusteringAlgo
                 var subPartition = minVAT.GetPartition();
                 var nodeIndexMap = subsetMap[minVatCluster];
 
-                meta.AppendFormat("Integrity: MinIntegrity={0}\r\n", minVAT.MinVat);
-                meta.AppendFormat("Removed Count:{0} \r\n", minVAT.NumNodesRemoved);
+                meta.AppendFormat("Vat: MinVat={0}\r\n", minVAT.MinVat);
+                meta.AppendFormat("Removed Count:{0}\r\n", minVAT.NumNodesRemoved);
                 meta.AppendLine(String.Join(",",
                     minVAT.NodeRemovalOrder.GetRange(0, minVAT.NumNodesRemoved).Select(c => nodeIndexMap[c])));
 
                 partition.MergeSubPartition(subPartition, nodeIndexMap, minVatCluster);
                 vatMap.Remove(minVatCluster);
                 subsetMap.Remove(minVatCluster);
+                Console.WriteLine("Found min cluster");
+                Console.WriteLine(meta);
             }
             partition.MetaData = meta.ToString();
             // The idea is now that we have partitions, combine them so that partition.Clusters.Count == minK
-
-            
-           // if (partition.Clusters.Count > _minK)
-           // {
-           //     combineClusters(partition, _minK);
-           // }
+            if (partition.Clusters.Count > _minK)
+            {
+                combineClusters(partition, _minK);
+            }
             return partition;
         }
-
         /// <summary>
         /// combineClusters is used when the partitioning achieved has too many clusters.
         /// </summary>
         /// <param name="partition">A partitioning of a graph with any number of clusters</param>
         /// <param name="minK">The desired number of clusters</param>
         /// <returns>A new partitioning with the desired number of clusters</returns>
+        public Partition combineClustersOld(Partition partition, int minK)
+        {
+            int[,] connections = new int[partition.Clusters.Count, partition.Clusters.Count];
+            LightWeightGraph g = (LightWeightGraph)_data;
+
+            // for quick reference let's make a list of which nodes are in which clusters
+            int[] clustAssignments = new int[g.Nodes.Count()];
+            for (int i = 0; i < partition.Clusters.Count; i++)
+            {
+                for (int j = 0; j < partition.Clusters[i].Points.Count; j++)
+                {
+                    clustAssignments[partition.Clusters[i].Points[j].Id] = partition.Clusters[i].Points[j].ClusterId;
+                }
+            }
+            // now go through each node and count its edges out to each cluster
+            // add these edges to the connections[] matrix
+            for (int i = 0; i < g.Nodes.Count(); i++)
+            {
+                int currentCluster = clustAssignments[i];
+                for (int e = 0; e < g.Nodes[i].Edge.Count(); e++)
+                {
+                    int adjacentNode = g.Nodes[i].Edge[e];
+                    int adjacentCluster = clustAssignments[adjacentNode];
+                    connections[currentCluster, adjacentCluster]++;
+                }
+            }
+            // we want to do (partition.Clusters.count - minK) merges
+            // keep a list of which partitions will be merged
+            List<int> merges = new List<int>();
+            for (int numMerges = 0; numMerges < partition.Clusters.Count - minK; numMerges++)
+            {
+                // find the largest connections[i,j] and merge clusters i and j
+                int largestI = 0;
+                int largestJ = 0;
+                double largestValue = 0;
+                for (int i = 0; i < partition.Clusters.Count; i++)
+                {
+                    for (int j = 0; j < partition.Clusters.Count; j++)
+                    {
+                        if (j <= i) continue;
+                        int sizeI = partition.Clusters[i].Points.Count;
+                        int sizeJ = partition.Clusters[j].Points.Count;
+                        double score = ((double)connections[i, j]) / (sizeI * sizeJ);
+                        if (score > largestValue)
+                        {
+                            largestValue = score;
+                            largestI = i;
+                            largestJ = j;
+                        }
+                    }
+                }
+                // if everything's zero, there is no hope ;-)
+                if (largestValue == 0)
+                {
+                    continue;
+                }
+                merges.Add(largestI);
+                merges.Add(largestJ);
+                // it is possible to merge J multiple times, if its nodes are split between clusters.
+                // we only want to merget J once, so we need to zero out all largestJ 
+                for (int i = 0; i < partition.Clusters.Count; i++)
+                {
+                    connections[i, largestJ] = 0;
+                }
+            }
+            // now we have the list *merges*, the idea is to take 2 numbers off it, 
+            // the first is smaller than the second.  We need to merge the second into the first, 
+            // remove the second, and renumber all clusters after the first
+            for (int numMerges = 0; numMerges < merges.Count / 2; numMerges++)
+            {
+                int firstCluster = merges[numMerges * 2];
+                int secondCluster = merges[(numMerges * 2) + 1];
+
+                // adds the points of the second cluster to the first cluster
+                for (int i = 0; i < partition.Clusters[secondCluster].Points.Count; i++)
+                {
+                    partition.Clusters[firstCluster].Points.Add(partition.Clusters[secondCluster].Points[i]);
+                }
+
+            }
+            // remove all the second clusters (count from the bottom
+            // so that the numbering doesn't get messed up...)
+            int[] toRemove = new int[merges.Count / 2];
+            for (int numMerges = 0; numMerges < merges.Count / 2; numMerges++)
+            {
+                int firstCluster = merges[numMerges * 2];
+                int secondCluster = merges[(numMerges * 2) + 1];
+
+                toRemove[numMerges] = secondCluster;
+            }
+            Array.Sort(toRemove);
+            for (int i = toRemove.Length - 1; i >= 0; i--)
+            {
+                partition.Clusters.RemoveAt(toRemove[i]);
+            }
+
+            // renumber the clusters
+            for (int i = 0; i < partition.Clusters.Count; i++)
+            {
+                partition.Clusters[i].Points.Sort();
+                partition.Clusters[i].ClusterId = i;
+            }
+            return partition;
+        }
+
         public Partition combineClusters(Partition partition, int minK)
         {
             // we want to do (partition.Clusters.count - minK) merges
@@ -379,7 +492,7 @@ namespace NetMining.ClusteringAlgo
                 }
 
                 // keep a list of which partitions will be merged
-               // List<int> merges = new List<int>();
+                // List<int> merges = new List<int>();
 
                 // find the largest connections[i,j] and merge clusters i and j
                 int largestI = 0;
@@ -393,8 +506,8 @@ namespace NetMining.ClusteringAlgo
                         int sizeI = partition.Clusters[i].Points.Count;
                         int sizeJ = partition.Clusters[j].Points.Count;
                         double score = ((double)connections[i, j]) / (sizeI * sizeJ);
+                        //double score = connections[i, j];
                         //if (sizeI > 40 || sizeJ > 40) score = 0;
-
                         if (score > largestValue)
                         {
                             largestValue = score;
@@ -415,18 +528,21 @@ namespace NetMining.ClusteringAlgo
                 {
                     continue;
                 }
+
+
+
                 // now we want to merge cluster largestJ into cluster largestI, 
                 // remove cluster largestJ, and renumber all clusters after the first
                 // adds the points of the second cluster to the first cluster
-                    for (int i = 0; i < partition.Clusters[largestJ].Points.Count; i++)
-                    {
-                        partition.Clusters[largestI].Points.Add(partition.Clusters[largestJ].Points[i]);
-                    }
+                for (int i = 0; i < partition.Clusters[largestJ].Points.Count; i++)
+                {
+                    partition.Clusters[largestI].Points.Add(partition.Clusters[largestJ].Points[i]);
+                }
 
-                
+
                 // remove largestJ cluster
                 partition.Clusters.RemoveAt(largestJ);
-                
+
 
                 // renumber the clusters
                 for (int i = 0; i < partition.Clusters.Count; i++)
@@ -441,102 +557,5 @@ namespace NetMining.ClusteringAlgo
             return partition;
         }
 
-        /// <summary>
-        /// This is a method to test using the largest cluster (as opposed to min integrity cluster)
-        /// in a hierarchical clustering
-        /// </summary>
-        /// <returns>A partition where the next hierarchical cluster division occurs on the largest cluster.</returns>
-        public Partition GetGPartitionUseLargestCluster()
-        {
-            DistanceMatrix mat = null;
-            if (_data.Type == AbstractDataset.DataType.DistanceMatrix)
-                mat = (DistanceMatrix)_data;
-            else if (_data.Type == AbstractDataset.DataType.PointSet)
-                mat = ((PointSet)_data).GetDistanceMatrix();
-
-            // get the partition
-            Partition partition = Partition.GetPartition((LightWeightGraph)_data);
-
-            //Dictionary to hold VAT 
-            var vatMap = new Dictionary<int, Integrity>();
-
-            //Dictionary to hold subset array
-            var subsetMap = new Dictionary<int, int[]>();
-            //while (clusterList.Count < _minK)
-            while (partition.Clusters.Count < _minK)
-            {
-                //Calculate the VAT for all values
-                foreach (var c in partition.Clusters.Where(c => !vatMap.ContainsKey(c.ClusterId)))
-                {
-                    //We must calculate a graph for this subset of data
-                    List<int> clusterSubset = c.Points.Select(p => p.Id).ToList();
-
-                    //Now calculate Vat
-                    LightWeightGraph lwg;
-                    if (_data.Type == AbstractDataset.DataType.Graph)
-                    {
-                        bool[] exclusion = new bool[_data.Count];
-                        for (int i = 0; i < _data.Count; i++)
-                            exclusion[i] = true;
-                        foreach (var p in c.Points)
-                            exclusion[p.Id] = false;
-                        lwg = new LightWeightGraph((LightWeightGraph)_data, exclusion);
-                    }
-                    else //Distance matrix or Pointset
-                    {
-                        Debug.Assert(mat != null, "mat != null");
-                        var subMatrix = mat.GetReducedDataSet(clusterSubset);
-
-                        //Generate our graph
-                        lwg = _graphGen.GenerateGraph(subMatrix.Mat);
-                    }
-
-                    subsetMap.Add(c.ClusterId, clusterSubset.ToArray());
-                    lwg.IsWeighted = _weighted;
-                    Integrity v = new Integrity(lwg, _reassignNodes, _alpha, _beta);
-                    _vatNodeRemovalOrder = v.NodeRemovalOrder;
-                    _vatNumNodesRemoved = v.NumNodesRemoved;
-                    if (_hillClimb)
-                        v.HillClimb();
-                    vatMap.Add(c.ClusterId, v);
-                }
-
-                meta.AppendLine("All calculated Integritys:");
-                //Now find the maximum cluster and break it up
-                int minVatCluster = 0;
-                double minVatValue = 0;
-                foreach (var c in subsetMap)
-                {
-                    meta.Append(String.Format("{0} ", c.Value.Length));
-                    if (c.Value.Length > minVatValue)
-                    {
-                        minVatCluster = c.Key;
-                        minVatValue = c.Value.Length;
-                    }
-                }
-                meta.AppendLine();
-
-                //now merge the partition into the cluster
-                var minVAT = vatMap[minVatCluster];
-                var subPartition = minVAT.GetPartition();
-                var nodeIndexMap = subsetMap[minVatCluster];
-
-                meta.AppendFormat("Integrity: MinIntegrity={0}\r\n", minVAT.MinVat);
-                meta.AppendFormat("Removed Count:{0} \r\n", minVAT.NumNodesRemoved);
-                meta.AppendLine(String.Join(",",
-                    minVAT.NodeRemovalOrder.GetRange(0, minVAT.NumNodesRemoved).Select(c => nodeIndexMap[c])));
-
-                partition.MergeSubPartition(subPartition, nodeIndexMap, minVatCluster);
-                vatMap.Remove(minVatCluster);
-                subsetMap.Remove(minVatCluster);
-            }
-            partition.MetaData = meta.ToString();
-            // The idea is now that we have partitions, combine them so that partition.Clusters.Count == minK
-            if (partition.Clusters.Count > _minK)
-            {
-                combineClusters(partition, _minK);
-            }
-            return partition;
-        }
     }
 }

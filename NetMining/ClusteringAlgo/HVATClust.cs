@@ -338,10 +338,10 @@ namespace NetMining.ClusteringAlgo
             }
             partition.MetaData = meta.ToString();
             // The idea is now that we have partitions, combine them so that partition.Clusters.Count == minK
-            if (partition.Clusters.Count > _minK)
-            {
-                combineClusters(partition, _minK);
-            }
+            //if (partition.Clusters.Count > _minK)
+            //{
+             //   combineClusters(partition, _minK);
+           // }
             return partition;
         }
         /// <summary>
@@ -502,6 +502,7 @@ namespace NetMining.ClusteringAlgo
                         int sizeJ = partition.Clusters[j].Points.Count;
                         double score = ((double)connections[i, j]) / (sizeI * sizeJ);
                         //double score = connections[i, j];
+                        //if (sizeI > 40 || sizeJ > 40) score = 0;
                         if (score > largestValue)
                         {
                             largestValue = score;

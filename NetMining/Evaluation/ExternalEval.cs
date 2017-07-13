@@ -5,6 +5,7 @@ using System.Text;
 using NetMining.ClusteringAlgo;
 using NetMining.Data;
 using NetMining.Files;
+using System.IO;
 
 namespace NetMining.Evaluation
 {
@@ -13,7 +14,7 @@ namespace NetMining.Evaluation
         public double TotalAccuracy;
         public int TotalMatched;
         public int TotalSize;
-        public List<GroundTruthMatch> Matches; 
+        public List<GroundTruthMatch> Matches;
         public readonly Partition P;
         public readonly LabelList L;
         public String TextResults;
@@ -47,7 +48,7 @@ namespace NetMining.Evaluation
             int[,] clusterMatching = labels.GetMatching(clusterFile);
             GreedyErrorEval(clusterMatching);
         }
-
+        
         private void GreedyErrorEval(int[,] clusterMatching)
         {
             int truthCount = L.UniqueLabels.Count;
@@ -68,23 +69,23 @@ namespace NetMining.Evaluation
             //Sort descending by size
             // THIS LINE MAKES IT NOT WORK FOR K8 GRAPHS WITH NOISE!!
             // trying the if statement which will only sort for k=2,4 graphs
-           // if (L.LabelIndices.GetLength(0) < 1000)
-           // {
-                Array.Sort(gtBySize, (x, y) => y.Value.CompareTo(x.Value));
-           // }
+            // if (L.LabelIndices.GetLength(0) < 1000)
+            // {
+            Array.Sort(gtBySize, (x, y) => y.Value.CompareTo(x.Value));
+            // }
             int sumCorrect = 0;
             int noNoiseSumCorrect = 0;
             StringBuilder sb = new StringBuilder();
             StringBuilder ssb = new StringBuilder();
             StringBuilder nonoisesb = new StringBuilder();
-int totalC = 0;
-int noNoiseC = 0;
+            int totalC = 0;
+            int noNoiseC = 0;
             //for each real cluster, assign the best of our clusters that hasn't
             //already been assigned
             for (int gtIndex = 0; gtIndex < truthCount; gtIndex++)
             {
 
-                
+
                 int realC = gtBySize[gtIndex].Key;
                 int assignedClust = 0;
                 for (int ourC = 0; ourC < partitionCount; ourC++)
@@ -121,22 +122,22 @@ int noNoiseC = 0;
 
                 sb.AppendLine();
                 sumCorrect += assigned[realC];
-                if (!L.UniqueLabels[realC].Equals("NA")) 
+                if (!L.UniqueLabels[realC].Equals("NA"))
                 {
                     noNoiseSumCorrect += assigned[realC];
                 }
-                
+
             }
             TotalMatched = sumCorrect;
             TotalSize = P.DataCount;
-            TotalAccuracy = (double) sumCorrect/ P.DataCount;
+            TotalAccuracy = (double)sumCorrect / P.DataCount;
 
-            for (int q = 0; q < gtBySize.Length-1; q++ )
+            for (int q = 0; q < gtBySize.Length - 1; q++)
             {
                 noNoiseC += gtBySize[q].Value;
             }
 
-                sb.AppendFormat("Total Accuracy: ({0}/{1}) {2}%", sumCorrect, P.DataCount, 100.0 * (double)sumCorrect / (double)P.DataCount);
+            sb.AppendFormat("Total Accuracy: ({0}/{1}) {2}%", sumCorrect, P.DataCount, 100.0 * (double)sumCorrect / (double)P.DataCount);
             ssb.AppendFormat("({0}/{1}), {2}%", sumCorrect, P.DataCount, 100.0 * (double)sumCorrect / (double)P.DataCount);
             sb.Append(Environment.NewLine);
             sb.AppendFormat("Rev Accuracy:   ({0}/{1}) {2}%", sumCorrect, totalC, 100.0 * (double)sumCorrect / (double)totalC);
@@ -159,7 +160,7 @@ int noNoiseC = 0;
             //CALCULATING THE RAND INDEX
 
             //start by parsing label file
-           DelimitedFile delimitedLabelFile = new DelimitedFile(labelFile);
+            DelimitedFile delimitedLabelFile = new DelimitedFile(labelFile);
             int labelCol = delimitedLabelFile.Data[0].Length;
             LabelList labels = new LabelList(delimitedLabelFile.GetColumn(labelCol - 1));
 
@@ -224,7 +225,7 @@ int noNoiseC = 0;
                 }
                 // now find the max of assignments
                 int maxAssign = 0;
-                for (int k=0; k< assignments.Length; k++)
+                for (int k = 0; k < assignments.Length; k++)
                 {
                     if (assignments[k] > maxAssign)
                     {
@@ -235,11 +236,13 @@ int noNoiseC = 0;
             }
             // add up majority[] and divide by number of vertices
             int total = 0;
-            for (int i=0; i< majority.Length; i++)
+            for (int i = 0; i < majority.Length; i++)
             {
                 total += majority[i];
             }
             return (double)total / labels.LabelIndices.Length;
         }
+
+        
     }
 }

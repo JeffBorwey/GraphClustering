@@ -124,6 +124,59 @@ namespace NetMining.ClusteringAlgo
         }
 
         /// <summary>
+        /// This will save the partitioning into the .cluster file format
+        /// </summary>
+        /// <param name="saveLocation">The path to the file</param>
+        /// <param name="dataFile">The path to the dataFile used</param>
+        /// <param name="metaData">This is additional information to append to the end
+        /// of the file</param>
+        public void SavePartition2(String saveLocation, String dataFile)
+        {
+            //Assumes .Cluster endinge
+            using (StreamWriter sw = new StreamWriter(saveLocation))
+            {
+                //if (Data.Type == AbstractDataset.DataType.PointSet)
+                //    sw.WriteLine("Points {0}", dataFile);
+                //else if (Data.Type == AbstractDataset.DataType.DistanceMatrix)
+                //    sw.WriteLine("DistanceMatrix {0}", dataFile);
+                //else if (Data.Type == AbstractDataset.DataType.Graph)
+                //    sw.WriteLine("Graph {0}", dataFile);
+
+                //sw.WriteLine("Clusters {0}", Clusters.Count);
+
+                String[] assignments = new String[((LightWeightGraph)Data).Nodes.Count()];
+                foreach (Cluster c in Clusters)
+                {
+                    foreach (ClusteredItem p in c.Points)
+                    {
+                        assignments[p.Id] = p.Id + ", " + ((LightWeightGraph)Data).Nodes[p.Id].sharedName + ", " + c.ClusterId;
+                    }
+
+                }
+                // we need to put in the nodes that have not been assigned
+                for (int i = 0; i < assignments.Length; i++)
+                {
+                    if (assignments[i] == null)
+                    {
+                        assignments[i] = i + ", " + ((LightWeightGraph)Data).Nodes[i].sharedName + ", NA";
+                    }
+                }
+
+                for (int i = 0; i < assignments.Count(); i++)
+                {
+
+                    sw.WriteLine(assignments[i]);
+
+                    //foreach (ClusteredItem p in c.Points)
+                    //    sw.Write("{0} ", p.Id);
+                    //sw.WriteLine();
+                    //sw.WriteLine("Meta {0}", MetaData);
+                }
+
+            }
+        }
+
+        /// <summary>
         /// Creates a Dataset partition
         /// </summary>
         /// <param name="clusters">List of clusters</param>
@@ -225,9 +278,132 @@ namespace NetMining.ClusteringAlgo
             
             return new Partition(clusterList, lwg);
         }
+        public Dictionary<String, Dictionary<int, String>> getNodeDescriptors()
+        {
+            Dictionary<String, Dictionary<int, String>> nodeDescriptors = new Dictionary<String, Dictionary<int, String>>();
+            Dictionary<int, String> newNodes = new Dictionary<int, String>();
+            for (int i=0; i< Clusters.Count; i++)
+            {
+                for (int j=0; j< Clusters[i].Points.Count; j++)
+                {
+                    
+                    newNodes.Add(Clusters[i].Points[j].Id, Clusters[i].Points[j].ClusterId + "");
+                }
+            }
+            nodeDescriptors.Add("label", newNodes);
+            return nodeDescriptors;
+        }
+
+        public static void combineClusters(String saveLocation, String clusterfileName, int minK)
+        {
+
+            //get the Partion file
+            Partition partition = new Partition(saveLocation + clusterfileName + ".cluster");
+            // we want to do (partition.Clusters.count - minK) merges
+            int startPartitions = partition.Clusters.Count;
+            LightWeightGraph g = (LightWeightGraph)partition.Data;
+            //get the name of the graph file from the partition file
+            String graphFile = "";
+            using (StreamReader sr = new StreamReader(saveLocation + clusterfileName + ".cluster"))
+            {
+                String dataString = sr.ReadLine();
+                graphFile = dataString.Substring(6);
+            }
+
+            for (int numMerges = 0; numMerges < startPartitions - minK; numMerges++)
+            {
+                int[,] connections = new int[partition.Clusters.Count, partition.Clusters.Count];
+
+                
+                    // for quick reference let's make a list of which nodes are in which clusters
+                    int[] clustAssignments = new int[g.Nodes.Count()];
+                for (int i = 0; i < partition.Clusters.Count; i++)
+                {
+                    for (int j = 0; j < partition.Clusters[i].Points.Count; j++)
+                    {
+                        clustAssignments[partition.Clusters[i].Points[j].Id] = partition.Clusters[i].Points[j].ClusterId;
+                    }
+                }
+                // now go through each node and count its edges out to each cluster
+                // add these edges to the connections[] matrix
+                for (int i = 0; i < g.Nodes.Count(); i++)
+                {
+                    int currentCluster = clustAssignments[i];
+                    for (int e = 0; e < g.Nodes[i].Edge.Count(); e++)
+                    {
+                        int adjacentNode = g.Nodes[i].Edge[e];
+                        int adjacentCluster = clustAssignments[adjacentNode];
+                        connections[currentCluster, adjacentCluster]++;
+                    }
+                }
+
+                // keep a list of which partitions will be merged
+                // List<int> merges = new List<int>();
+
+                // find the largest connections[i,j] and merge clusters i and j
+                int largestI = 0;
+                int largestJ = 0;
+                double largestValue = 0;
+                for (int i = 0; i < partition.Clusters.Count; i++)
+                {
+                    for (int j = 0; j < partition.Clusters.Count; j++)
+                    {
+                        if (j <= i) continue;
+                        int sizeI = partition.Clusters[i].Points.Count;
+                        int sizeJ = partition.Clusters[j].Points.Count;
+                        double score = ((double)connections[i, j]) / (sizeI * sizeJ);
+                        //double score = connections[i, j];
+                        //if (sizeI > 40 || sizeJ > 40) score = 0;
+                        if (score > largestValue)
+                        {
+                            largestValue = score;
+                            largestI = i;
+                            largestJ = j;
+                        }
+                        // we want to merge smaller into larger clusters
+                        if (sizeI > sizeJ)
+                        {
+                            int temp = largestI;
+                            largestI = largestJ;
+                            largestJ = temp;
+                        }
+                    }
+                }
+                // if everything's zero, there is no hope ;-)
+                if (largestValue == 0)
+                {
+                    continue;
+                }
+
+
+
+                // now we want to merge cluster largestJ into cluster largestI, 
+                // remove cluster largestJ, and renumber all clusters after the first
+                // adds the points of the second cluster to the first cluster
+                for (int i = 0; i < partition.Clusters[largestJ].Points.Count; i++)
+                {
+                    partition.Clusters[largestI].Points.Add(partition.Clusters[largestJ].Points[i]);
+                }
+
+
+                // remove largestJ cluster
+                partition.Clusters.RemoveAt(largestJ);
+
+
+                // renumber the clusters
+                for (int i = 0; i < partition.Clusters.Count; i++)
+                {
+                    partition.Clusters[i].Points.Sort();
+                    for (int j = 0; j < partition.Clusters[i].Points.Count; j++)
+                    {
+                        partition.Clusters[i].Points[j].ClusterId = i;
+                    }
+                }
+            }
+            partition.SavePartition(saveLocation + clusterfileName + minK +".cluster", graphFile);
+        }
 
     }
-
-
+    
 
 }

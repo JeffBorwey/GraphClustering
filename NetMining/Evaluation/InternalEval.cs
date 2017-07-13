@@ -3,6 +3,7 @@ using System.Linq;
 using NetMining.ClusteringAlgo;
 using NetMining.Data;
 using NetMining.Files;
+using NetMining.Graphs;
 
 namespace NetMining.Evaluation
 {
@@ -412,6 +413,165 @@ namespace NetMining.Evaluation
                    "," + separability[cluster] + "," + separability.Min() + "," + WAseparability + "," + separability.Max() + "\n";
             }
                 return report;
+        }
+
+        public static String NoiseStats(String clusterFileName)
+        {
+            // need to calculate ns, ms and cs, as described in Yang and Leskovec ICDM2012 
+            //start by parsing label file
+            //DelimitedFile delimitedLabelFile = new DelimitedFile(labelFile);
+            //int labelCol = delimitedLabelFile.Data[0].Length;
+            //LabelList labels = new LabelList(delimitedLabelFile.GetColumn(labelCol - 1));
+
+            //get the Partion file
+            Partition clusterFile = new Partition(clusterFileName);
+            //LightWeightGraph lwg = LightWeightGraph.GetGraphFromFile(graphFile);
+            int[] assignments = new int[clusterFile.Graph.Nodes.Length];
+            // initialize assignments array to -1
+            // ultimately, nodes that have been removed as part of a critical attack set will stay at -1 assignment
+            for (int i=0; i< assignments.Length; i++)
+            {
+                assignments[i] = -1;
+            }
+            //int noiseThreshold;
+            //if (assignments.Length == 550) noiseThreshold = 500;
+            //else if (assignments.Length == 770) noiseThreshold = 700;
+            //else noiseThreshold = 1100;
+
+            //if (assignments.Length == 220) noiseThreshold = 200;
+            //else if (assignments.Length == 440) noiseThreshold = 400;
+            //else noiseThreshold = 800;
+
+
+            for (int cluster = 0; cluster < clusterFile.Clusters.Count; cluster++)
+            {
+                for (int j = 0; j < clusterFile.Clusters[cluster].Points.Count; j++)
+                {
+                    int clusterid = clusterFile.Clusters[cluster].Points[j].ClusterId;
+                    int id = clusterFile.Clusters[cluster].Points[j].Id;
+                    assignments[id] = clusterid;
+                }
+            }
+            int[] ns = new int[clusterFile.Clusters.Count];
+            int[] ms = new int[clusterFile.Clusters.Count];
+            int[] cs = new int[clusterFile.Clusters.Count];
+            Boolean[] isAllNoise = new Boolean[clusterFile.Clusters.Count];
+            // if we're doing this without reassign, we need new nodes and edges valuse
+            int edges = 0;
+            int nodes = 0;
+
+            for (int cluster = 0; cluster < clusterFile.Clusters.Count; cluster++)
+            {
+                ns[cluster] = clusterFile.Clusters[cluster].Points.Count;
+                isAllNoise[cluster] = true;
+                for (int j = 0; j < clusterFile.Clusters[cluster].Points.Count; j++) // for each vertex in this cluster
+                {
+                    nodes++;
+                    //if (clusterFile.Clusters[cluster].Points[j].Id < noiseThreshold)
+                    //{
+                    //    isAllNoise[cluster] = false;
+                   // }
+                    for (int k=0; k < clusterFile.Graph.Nodes[clusterFile.Clusters[cluster].Points[j].Id].Edge.Length; k++) // for each edge k adjacent to j
+                    {
+                        edges++;
+                        int edge = clusterFile.Graph.Nodes[clusterFile.Clusters[cluster].Points[j].Id].Edge[k];
+                        if (cluster == assignments[edge])
+                        {
+                            ms[cluster]++;
+                            //if (cluster == 7) Console.WriteLine("ms " + edge);
+                        } else
+                        {
+                            cs[cluster]++;
+                            //if (cluster == 7) Console.WriteLine("cs " + edge);
+                        }
+                    }
+                }
+                
+
+            }
+
+            String report = "";
+
+            double[] internalDensity = new double[clusterFile.Clusters.Count];
+            double[] averageDegree = new double[clusterFile.Clusters.Count];
+            double[] expansion = new double[clusterFile.Clusters.Count];
+            double[] cutRatio = new double[clusterFile.Clusters.Count];
+            double[] conductance = new double[clusterFile.Clusters.Count];
+            double[] separability = new double[clusterFile.Clusters.Count];
+            double[] modularity = new double[clusterFile.Clusters.Count];
+            double WAinternalDensity = 0;
+            double WAaverageDegree = 0;
+            double WAexpansion = 0;
+            double WAcutRatio = 0;
+            double WAconductance = 0;
+            double WAseparability = 0;
+            double WAmodularity = 0;
+
+            for (int cluster = 0; cluster < clusterFile.Clusters.Count; cluster++)
+            {
+                double totalPossibleInternalEdges = ((ns[cluster] * (ns[cluster] - 1)) / 2);
+                internalDensity[cluster] = totalPossibleInternalEdges == 0 ? 0 : (double)ms[cluster] / totalPossibleInternalEdges;
+                averageDegree[cluster] = 2.0 * ms[cluster] / ns[cluster];
+                expansion[cluster] = (double)cs[cluster] / ns[cluster];
+                cutRatio[cluster] = (double)cs[cluster] / (ns[cluster]*(assignments.Length - ns[cluster]));
+                conductance[cluster] = (double)cs[cluster] / (2 * ms[cluster] + cs[cluster]);
+                separability[cluster] = (double)ms[cluster] / cs[cluster];
+                modularity[cluster] = ((double)ms[cluster]/edges) - Math.Pow( ((double)ms[cluster]/edges) + ((double)(cs[cluster])/(2* edges)) ,2 );
+            }
+            for (int cluster = 0; cluster < clusterFile.Clusters.Count; cluster++)
+            {
+                WAinternalDensity += internalDensity[cluster] * ns[cluster];
+                WAaverageDegree += averageDegree[cluster] * ns[cluster];
+                WAexpansion += expansion[cluster] * ns[cluster];
+                WAcutRatio += cutRatio[cluster] * ns[cluster];
+                WAconductance += conductance[cluster] * ns[cluster];
+                WAseparability += separability[cluster] * ns[cluster];
+                WAmodularity += modularity[cluster];
+            }
+
+            WAinternalDensity /= (double) nodes;
+            WAaverageDegree /= (double)nodes;
+            WAexpansion /= (double)nodes;
+            WAcutRatio /= (double)nodes;
+            WAconductance /= (double)nodes;
+            WAseparability /= (double)nodes;
+            //*
+
+           
+                for (int cluster = 0; cluster < clusterFile.Clusters.Count; cluster++)
+                {
+                if (ns[cluster] >=20) {
+
+                    report += clusterFileName.Substring(clusterFileName.LastIndexOf('\\') + 1) + "," + cluster + "," +
+                       //(isAllNoise[cluster] ? 1 : 0) + "," + 
+                       ns[cluster] + "," + ms[cluster] + "," + cs[cluster] +
+                       "," + internalDensity[cluster] +
+                       //"," + 
+                       //internalDensity.Min() + "," + WAinternalDensity + "," + internalDensity.Max() +
+                       //"," + averageDegree[cluster] + ","  + averageDegree.Min() + "," + averageDegree.Average() + "," + averageDegree.Max() +
+                       "," + averageDegree[cluster] +
+                       //"," + averageDegree.Min() + "," + WAaverageDegree + "," + averageDegree.Max() +
+                       "," + expansion[cluster] +
+                       //"," + expansion.Min() + "," + WAexpansion + "," + expansion.Max() + 
+                       "," + cutRatio[cluster] +
+                       //"," + cutRatio.Min() + "," + WAcutRatio + "," + cutRatio.Max() +
+                       "," + conductance[cluster] +
+                       //"," + conductance.Min() + "," + WAconductance + "," + conductance.Max() + 
+                       "," + separability[cluster] +
+                       //"," + separability.Min() + "," + WAseparability + "," + separability.Max() + 
+                       "," + modularity[cluster] +
+                        "\n";
+                }
+            }
+            //*/
+
+
+            /*
+            report += clusterFileName.Substring(clusterFileName.LastIndexOf('\\') + 1) + "," + 
+                 WAinternalDensity + "," +  WAaverageDegree + "," +  WAexpansion + "," + WAcutRatio + "," +
+                  WAconductance + "," + WAseparability + "," + WAmodularity+"\n";
+            //*/
+            return report;
         }
     }
 }

@@ -521,7 +521,97 @@ namespace NetMining.Graphs
             }
 
         }
+        /// <summary>
+        /// Saves a Light weight graph as a GML
+        /// </summary>
+        /// <param name="filename">File to save to</param>
+        /// <param name="nodeDescriptors">A dictionary of dictionaries.  The Key is the attribute tag (eg: "label") and the value is a mapping from node index to attribute value</param>
+        /// <param name="nodeGraphicsDescriptors">A dictionary of dictionaries for graphics attributes.  The Key is the attribute tag (eg: "fill", or "x") and the value is a mapping from node index to attribute value</param>
+        public void SaveColorGML(String filename, String labelFile, Dictionary<String, Dictionary<int, String>> nodeDescriptors = null, Dictionary<String, Dictionary<int, String>> nodeGraphicsDescriptors = null)
+        {
+            // colors are red blue yellow green purple
+            String[] colors = {"#800000","#00FFFF","#FF8C00","#00F00","#8A2BE2",
+                "#DC143C","#48D1CC","#FFD700","#32CD32","#BA55D3",
+                "#FF0000","#4682B4","#DAA520","#90EE90","#800080",
+                "#FF6347","#6495ED","#F4A460","#00FA9A","#FF00FF",
+                "#F08080","#1E90FF","#D2691E","#008080","#FFC0CB" };
 
+            // get info from label file
+            DelimitedFile delimitedLabelFile = new DelimitedFile(labelFile);
+            //int labelCol = delimitedLabelFile.Data[0].Length;
+            //LabelList labels = new LabelList(delimitedLabelFile.GetColumn(labelCol - 1));
+            LabelListOverlapping labelsO = new LabelListOverlapping(delimitedLabelFile);
+
+            using (StreamWriter sw = new StreamWriter(filename))
+            {
+                sw.WriteLine("graph [");
+
+                for (int i = 0; i < this.Nodes.Length; i++)
+                {
+                    sw.WriteLine("\tnode [");
+                    sw.WriteLine("\t\tid " + i);
+                    String color;
+                    if (labelsO.LabelIndices[i].Count > 1)
+                    {
+                        color = "#A9A9A9";
+                    } else
+                    {
+                        color = colors[labelsO.LabelIndices[i][0]%25];
+                    }
+                    sw.WriteLine("\t\tfill " + "\"" + color + "\"");
+                    if (nodeDescriptors != null)
+                    {
+                        foreach (var kv in nodeDescriptors)
+                        {
+                            if (kv.Value.ContainsKey(i))
+                            {
+                                String tag = kv.Key;
+                                String val = kv.Value[i];
+                                sw.WriteLine("\t\t{0} {1}", tag, val);
+                            }
+                        }
+                    }
+
+                    if (nodeGraphicsDescriptors != null)
+                    {
+                        var attributes = (from kv in nodeGraphicsDescriptors
+                                          where kv.Value.ContainsKey(i)
+                                          select new KeyValuePair<string, string>(kv.Key, kv.Value[i])).ToList();
+
+                        if (attributes.Count > 0)
+                        {
+                            sw.WriteLine("\t\tgraphics [");
+
+                            foreach (var kv in attributes)
+                            {
+                                String tag = kv.Key;
+                                String val = kv.Value;
+                                sw.WriteLine("\t\t\t{0} {1}", tag, val);
+                            }
+
+                            sw.WriteLine("\t\t]");
+                        }
+                    }
+                    sw.WriteLine("\t]");
+                }
+
+                for (int i = 0; i < Nodes.Length; i++)
+                {
+                    for (int j = 0; j < Nodes[i].Count; j++)
+                    {
+                        sw.WriteLine("\tedge [");
+                        sw.WriteLine("\t\tsource " + i);
+                        sw.WriteLine("\t\ttarget " + Nodes[i].Edge[j]);
+                        if (this.IsWeighted)
+                            sw.WriteLine("\t\tvalue " + Nodes[i].EdgeWeights[j]);
+                        sw.WriteLine("\t]");
+                    }
+                }
+
+                sw.WriteLine("]");
+            }
+
+        }
         /*
         //Depreciated
         public void SaveGML(String filename, NetVertDesciption[] descriptors = null,  Dictionary<int, Color> colors = null)
@@ -589,7 +679,7 @@ namespace NetMining.Graphs
             List<List<int>> edges = new List<List<int>>();
             List<List<double>> weights = new List<List<double>>();
             int numNodes = 0;
-            List<int> labels = new List<int>();
+            List<String> labels = new List<String>();
             using (StreamReader sr = new StreamReader(file))
             {
                 String readToEnd = sr.ReadToEnd();
@@ -609,16 +699,25 @@ namespace NetMining.Graphs
                             int j = i;
                             while (split[j] != "]")
                             {
-                                if (split[j] == "id")
+                                int currentId;
+                                if (split[j] == "id") // change to id
                                 {
                                     String nodeId = split[j + 1];
                                     nodeIdLookup[nodeId] = numNodes++;
+                                    currentId = (int)double.Parse(split[j + 1]); // i added
                                 }
-                               // if (split[j] == "value")
-                               // {
-                               //    int nodevalue = int.Parse(split[j + 1]);
-                               //    labels.Add(nodevalue);
-                               // }
+                                if (split[j] == "sharedname")
+                                {
+                                    String sharedname = split[j + 1];
+                                    sharedname = sharedname.Substring(1);
+                                    sharedname = sharedname.Substring(0, sharedname.Length-1);
+                                    labels.Add(sharedname);
+                                }
+                                // if (split[j] == "value")
+                                // {
+                                //    int nodevalue = int.Parse(split[j + 1]);
+                                //    labels.Add(nodevalue);
+                                // }
                                 j++;
                             }
                             break;
@@ -691,14 +790,147 @@ namespace NetMining.Graphs
             {
                 nodes.Add(new LightWeightNode(i, true, edges[i], weights[i]));
             }
-        //    for (int i = 0; i < numNodes; i++)
-         //   {
-         //       nodes[i].Label = labels[i];
-        //    }
+            for (int i = 0; i < nodes.Count(); i++)
+            {
+                nodes[i].sharedName = labels[i];
+            }
 
 
             return new LightWeightGraph(nodes.ToArray(), isWeighted);
         }
+
+
+        public static LightWeightGraph GetGraphFromGraphML(String file)
+        {
+            Boolean isDirected = false;
+            Boolean isWeighted = false;
+            Dictionary<string, int> nodeIdLookup = new Dictionary<string, int>();
+            HashSet<Tuple<int, int>> edgeHashSet = new HashSet<Tuple<int, int>>();
+
+            List<List<int>> edges = new List<List<int>>();
+            List<List<double>> weights = new List<List<double>>();
+            int numNodes = 0;
+            List<String> labels = new List<String>();
+            using (StreamReader sr = new StreamReader(file))
+            {
+                String readToEnd = sr.ReadToEnd();
+                String[] split = readToEnd.Split(new char[] { '\n', '\r', ' ' });
+
+                for (int i = 0; i < split.Length; i++)
+                {
+                    switch (split[i])
+                    {
+                        //case "directed":
+                        //    isDirected = int.Parse(split[i + 1]) == 1;
+                        //    break;
+                        //case "weighted":
+                        //    isWeighted = int.Parse(split[i + 1]) == 1;
+                        //    break;
+                        case "<node":
+                            int j = i;
+                            while (split[j] != "</node>")
+                            {
+                                //int currentId;
+                                if (split[j].Substring(0,3) == "id=")
+                                {
+                                    String nodeId = split[j].Substring(4, split[j].Length - 2);
+                                    nodeIdLookup[nodeId] = numNodes++;
+                                    //currentId = int.Parse(split[j + 1]); // i added
+                                }
+                                if (split[j].Substring(0, 9) == "key=\"name")
+                                {
+                                    String sharedname = split[j].Substring(12, split[j].Length-7);
+                                    //sharedname = sharedname.Substring(1);
+                                    //sharedname = sharedname.Substring(0, sharedname.Length - 1);
+                                    labels.Add(sharedname);
+                                }
+                                // if (split[j] == "value")
+                                // {
+                                //    int nodevalue = int.Parse(split[j + 1]);
+                                //    labels.Add(nodevalue);
+                                // }
+                                j++;
+                            }
+                            break;
+                    }
+                }
+
+                //Add a number of edge lists equal to the number of nodes
+                for (int i = 0; i < numNodes; i++)
+                {
+                    edges.Add(new List<int>());
+                    weights.Add(new List<double>());
+                }
+
+                for (int i = 0; i < split.Length; i++)
+                {
+                    switch (split[i])
+                    {
+                        case "edge":
+                            int sourceId = 0, targetId = 0;
+                            double edgeWeight = 1.0f;
+                            int j = i;
+
+                            while (split[j] != "]")
+                            {
+                                if (split[j] == "source")
+                                {
+                                    sourceId = nodeIdLookup[split[j + 1]];
+                                }
+                                else if (split[j] == "target")
+                                {
+                                    targetId = nodeIdLookup[split[j + 1]];
+                                }
+                                else if (split[j] == "weight" || split[j] == "value")
+                                {
+                                    edgeWeight = double.Parse(split[j + 1]);
+                                }
+                                j++;
+                            }
+
+                            Tuple<int, int> toEdge = new Tuple<int, int>(sourceId, targetId);
+
+                            if (isDirected)
+                            {
+                                edges[toEdge.Item1].Add(toEdge.Item2);
+                                weights[toEdge.Item1].Add(edgeWeight);
+                            }
+                            else //undirected case, try adding the back edge too
+                            {
+                                Tuple<int, int> fromEdge = new Tuple<int, int>(targetId, sourceId);
+                                if (!edgeHashSet.Contains(toEdge))
+                                {
+                                    edges[toEdge.Item1].Add(toEdge.Item2);
+                                    weights[toEdge.Item1].Add(edgeWeight);
+                                    edgeHashSet.Add(toEdge);
+                                }
+                                if (!edgeHashSet.Contains(fromEdge))
+                                {
+                                    edges[fromEdge.Item1].Add(fromEdge.Item2);
+                                    weights[fromEdge.Item1].Add(edgeWeight);
+                                    edgeHashSet.Add(fromEdge);
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+
+            List<LightWeightNode> nodes = new List<LightWeightNode>();
+            for (int i = 0; i < numNodes; i++)
+            {
+                nodes.Add(new LightWeightNode(i, true, edges[i], weights[i]));
+            }
+            for (int i = 0; i < nodes.Count(); i++)
+            {
+                nodes[i].sharedName = labels[i];
+            }
+
+
+            return new LightWeightGraph(nodes.ToArray(), isWeighted);
+        }
+
+
         #endregion
         #region ".net"
 
@@ -1004,6 +1236,7 @@ namespace NetMining.Graphs
             public int[] Edge;
             public double[] EdgeWeights; //if null do nothing
             internal int Count;
+            public String sharedName;
             //holds the edge offset for this node, based upon the simple edge indexing scheme
             //Edges are indexed starting with node 0, from edge 0 to the last edge, then node 1, etc.
 
